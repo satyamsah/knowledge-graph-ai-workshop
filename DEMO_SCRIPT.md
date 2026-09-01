@@ -250,6 +250,51 @@ MATCH (n) RETURN n LIMIT 60
 > "This is the tech world as a graph. Every node is a thing,
 > every arrow is a relationship. Now let's query it."
 
+### Reality check — open slides/06-reality-check.md (10 min)
+
+This is the most important non-technical moment of the session. Don't skip it.
+
+Say:
+> "Before we start querying — I want to be honest with you about something.
+> This data looks clean because it was designed carefully. I decided what to
+> include and what to leave out. Let me tell you what happens when you skip that step."
+
+Walk through the key slides:
+
+**Slide 2 — the hype vs. reality**
+> "Nine months ago I got sucked into the idea that AI agents could build a
+> Knowledge Graph for me automatically. After all, LLMs understand semantics,
+> GraphRAG rolls off the tongue... how hard could it be?
+> The answer: 90 to 95% of what the AI generates is useless for the specific
+> questions you actually need to answer."
+
+**Slide 3 — why AI-generated graphs are noisy**
+> "The LLM will extract every relationship it can find. That sounds good.
+> But you end up with Apple Inc., Apple, and apple all as separate nodes.
+> Orphan nodes nothing connects to. Five different ways to say the same relationship.
+> It looks like a graph. It doesn't behave like one."
+
+**Slide 4 — Occam's Razor**
+> "Our graph today: 10 companies, 10 people, 25 products, 5 relationship types.
+> Every single node is reachable. Every relationship is queryable.
+> A naive AI-generated version of this same domain might have 500 nodes,
+> 40 relationship types, and answer your questions worse."
+
+**Slide 6 — the data modeling analogy**
+> "This is exactly like data modeling. Cheap tooling makes it easy to create
+> a new schema per query — you get dashboard-driven development, a mess that
+> can't grow. The same trap exists here. Building a KG is easy.
+> Building a simple, intentional KG that evolves cleanly — that takes work."
+
+**Slide 7 — close strong**
+> "The hard work is the valuable work. Anyone can call an LLM API.
+> The skill — the thing worth putting on your CV — is knowing what to model
+> and why. That judgment only comes from doing the work."
+
+Pause. Let it land. Then:
+> "OK — now that you know what good design looks like, let's write some queries
+> and see why it matters."
+
 ---
 
 ## Block 4 — Querying the Graph (2:00–2:30)
