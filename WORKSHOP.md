@@ -200,7 +200,13 @@ MATCH (c:Company)-[:MAKES]->(p:Product) RETURN c, p
 Open `exercises/01-basics/exercise.py` and fill in the TODOs at the bottom:
 - Create a `Person` node for `"Steve Jobs"`
 - Create a `[:FOUNDED]` relationship: Steve Jobs → Apple
-- Verify in the browser:
+
+When done, re-run the file:
+```bash
+python exercises/01-basics/exercise.py
+```
+
+Then verify in the browser:
 
 ```cypher
 MATCH (p:Person)-[:FOUNDED]->(c:Company) RETURN p, c
