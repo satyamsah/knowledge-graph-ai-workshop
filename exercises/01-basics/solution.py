@@ -60,9 +60,10 @@ with driver.session() as session:
     session.execute_write(create_product, "Google", "Android", "mobile OS",  2008)
     print("✓ Products linked")
 
-    session.execute_write(create_person, "Steve Jobs")
-    session.execute_write(link_founder,  "Steve Jobs", "Apple")
-    print("✓ Steve Jobs linked to Apple")
+    session.execute_write(create_person,  "Linus Torvalds")
+    session.execute_write(create_company, "Linux Foundation", 1991, "San Francisco")
+    session.execute_write(link_founder,   "Linus Torvalds", "Linux Foundation")
+    print("✓ Linus Torvalds linked to Linux Foundation")
 
 print("\nVerify in Neo4j browser:")
 print("  MATCH (p:Person)-[:FOUNDED]->(c:Company) RETURN p, c")

@@ -94,35 +94,43 @@ print('  MATCH (c:Company)-[:MAKES]->(p:Product) RETURN c, p')
 
 # ── Step 4: YOUR TURN ─────────────────────────────────────────────────────
 #
-# Add Steve Jobs as the founder of Apple.
+# Add a founder to the graph — using data NOT already in our main dataset.
+#
+# We'll add:  Linus Torvalds  -[:FOUNDED]->  Linux Foundation
+#
+# This is real data — Linus Torvalds created Linux in 1991.
+# It's not in seed.py so you're genuinely adding something new.
 #
 # You need to:
-#   a) Create a Person node for Steve Jobs
-#   b) Create a [:FOUNDED] relationship: (Steve Jobs)-[:FOUNDED]->(Apple)
+#   a) Create a Person node for Linus Torvalds
+#   b) Create a Company node for Linux Foundation
+#   c) Create a [:FOUNDED] relationship between them
 #
-# A Person node looks like this:
-#   MERGE (p:Person {name: $name})
-#
-# A FOUNDED relationship looks like this:
-#   MATCH (p:Person  {name: $person})
-#   MATCH (c:Company {name: $company})
+# The Cypher patterns:
+#   MERGE (p:Person  {name: $name})
+#   MERGE (c:Company {name: $name})
+#   MATCH (p:Person  {name: $person}), (c:Company {name: $company})
 #   MERGE (p)-[:FOUNDED]->(c)
 #
 # Step a — fill in this function:
 def create_person(tx, name):
-    pass  # TODO: replace 'pass' with a tx.run() call that MERGEs a Person node
+    pass  # TODO: replace 'pass' with a tx.run() that MERGEs a Person node
 
-# Step b — fill in this function:
+# Step b — fill in this function (reuse create_company from Step 2 above):
+# create_company is already defined — you can call it directly.
+
+# Step c — fill in this function:
 def link_founder(tx, person, company):
-    pass  # TODO: replace 'pass' with a tx.run() call that MERGEs a [:FOUNDED] relationship
+    pass  # TODO: replace 'pass' with a tx.run() that MERGEs a [:FOUNDED] relationship
 
-# Step c — uncomment these lines once your functions are ready:
+# Step d — uncomment these lines once your functions are ready:
 # with driver.session() as session:
-#     session.execute_write(create_person, "Steve Jobs")
-#     session.execute_write(link_founder,  "Steve Jobs", "Apple")
-#     print("✓ Steve Jobs linked to Apple")
+#     session.execute_write(create_person,  "Linus Torvalds")
+#     session.execute_write(create_company, "Linux Foundation", 1991, "San Francisco")
+#     session.execute_write(link_founder,   "Linus Torvalds", "Linux Foundation")
+#     print("✓ Linus Torvalds linked to Linux Foundation")
 
-# Step d — verify in the Neo4j browser:
+# Step e — verify in the Neo4j browser:
 #   MATCH (p:Person)-[:FOUNDED]->(c:Company) RETURN p, c
 
 # ── Stuck? See exercises/01-basics/solution.py ────────────────────────────

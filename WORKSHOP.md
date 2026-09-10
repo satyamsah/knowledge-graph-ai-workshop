@@ -356,30 +356,20 @@ Click on a node to see its properties.
 
 ---
 
-## 💻 Your turn — add Steve Jobs
+## 💻 Your turn — add a real founder
 
-Open `exercises/01-basics/exercise.py` in your editor.
-Scroll to the bottom — you'll see the TODO section.
+We'll add **Linus Torvalds** — the creator of Linux.
+This data is NOT in `seed.py` so you're genuinely adding something new.
 
-You need to:
-1. Write a `create_person(tx, name)` function that creates a `Person` node
-2. Write a `link_founder(tx, person_name, company_name)` function that creates a `[:FOUNDED]` relationship
-3. Call both to link `"Steve Jobs"` → `"Apple"`
+Open `exercises/01-basics/exercise.py` in your editor and scroll to the bottom — you'll see the TODO section.
 
-**Hint — the pattern looks like this:**
-```python
-def create_person(tx, name):
-    tx.run("MERGE (:Person {name: $name})", name=name)
+You need to write two functions:
+1. `create_person(tx, name)` — creates a Person node
+2. `link_founder(tx, person, company)` — creates a `[:FOUNDED]` relationship
 
-def link_founder(tx, person_name, company_name):
-    tx.run(
-        "MATCH (p:Person {name:$person_name}), (c:Company {name:$company_name}) "
-        "MERGE (p)-[:FOUNDED]->(c)",
-        person_name=person_name, company_name=company_name,
-    )
-```
+**The Cypher patterns are in the comments** — read them carefully.
 
-When done, re-run the file:
+When done, uncomment Step d and re-run:
 ```bash
 python exercises/01-basics/exercise.py
 ```
@@ -389,7 +379,7 @@ Verify in the browser:
 MATCH (p:Person)-[:FOUNDED]->(c:Company) RETURN p, c
 ```
 
-✅ Steve Jobs appears connected to Apple.
+✅ Linus Torvalds appears connected to Linux Foundation.
 
 **Stuck?** Full solution in `exercises/01-basics/solution.py`
 
