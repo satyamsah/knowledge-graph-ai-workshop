@@ -83,8 +83,21 @@ pip install -r requirements.txt
 
 ```bash
 cp .env.example .env
-# Open .env and paste your ANTHROPIC_API_KEY
 ```
+
+Now open the `.env` file in any text editor and replace `sk-ant-your-key-here` with your real key:
+
+```
+ANTHROPIC_API_KEY=sk-ant-api03-xxxxxxxxxxxxxxxxxxxxxxxx
+```
+
+**Where to get a key:**
+1. Go to https://console.anthropic.com
+2. Sign up (free) or log in
+3. Click **Get API Keys** → **Create Key**
+4. Copy the key and paste it into `.env`
+
+> The `.env` file stays on your machine only — it is in `.gitignore` and will never be pushed to GitHub.
 
 ### 5. Verify everything works
 
