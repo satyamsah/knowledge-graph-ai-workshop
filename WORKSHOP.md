@@ -1,280 +1,456 @@
-# Knowledge Graphs for AI — Workshop Guide
+# Knowledge Graphs for AI
+## Workshop Guide — 3.5 hours
 
-> Follow this file top to bottom during the session.
-> Each step has a ✅ checkpoint — don't move on until you see it.
+> **How to use this file:**
+> - `📖 CONCEPT` — read along while the presenter explains
+> - `👀 DEMO` — watch the presenter's screen
+> - `💻 EXERCISE` — your turn to code
+>
+> Follow top to bottom. Each section ends with a ✅ checkpoint.
+> Don't move on until you hit it.
 
 ---
 
-## Step 0 — Setup (0:00–0:15)
+# PART 0 — Setup (0:00–0:15)
 
-### 0.1 Start the database
+---
 
+## 💻 Get everything running
+
+Run these one at a time. Wait for each to finish before the next.
+
+**1. Start the graph database**
 ```bash
 docker compose up -d
 ```
-
 Wait 20 seconds, then open **http://localhost:7474** in your browser.
-Log in with:
-- Username: `neo4j`
-- Password: `workshop123`
+Log in with username `neo4j` and password `workshop123`.
 
-✅ You should see the Neo4j Browser homepage.
+✅ You see the Neo4j Browser homepage.
 
 ---
 
-### 0.2 Set up Python
-
+**2. Set up Python**
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate        # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-✅ You should see packages installing with no errors.
+✅ Packages install with no errors.
 
 ---
 
-### 0.3 Add your API key
-
+**3. Add your Anthropic API key**
 ```bash
 cp .env.example .env
 ```
 
-Open the `.env` file in your editor and replace `sk-ant-your-key-here` with your real key:
-
+Open `.env` in any text editor. Replace `sk-ant-your-key-here` with your real key:
 ```
 ANTHROPIC_API_KEY=sk-ant-api03-xxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
-Get a free key at: https://console.anthropic.com → Get API Keys → Create Key
+Get a free key at → **https://console.anthropic.com** → Get API Keys → Create Key
 
-✅ The key is saved in `.env`.
+✅ Key is saved in `.env`.
 
 ---
 
-### 0.4 Verify everything works
-
+**4. Verify everything works**
 ```bash
 python check_setup.py
 ```
 
-✅ You should see:
+✅ You see:
 ```
 ✓ Neo4j connected (localhost:7687)
 ✓ Anthropic API reachable
 ✓ You're all set — see you at the workshop!
 ```
 
-**Common errors:**
+**Something broken? Check this table:**
 
 | Error | Fix |
 |-------|-----|
-| `Client.__init__() got an unexpected keyword argument 'proxies'` | Run `pip install --upgrade anthropic httpx` |
 | `command not found: python` | Use `python3` instead |
 | `source: no such file or directory: .venv` | Run `python3 -m venv .venv` first |
-| Neo4j not connecting | `docker compose up -d`, wait 20 seconds, retry |
-| API key error | Check `.env` — no quotes around the key, no trailing spaces |
-| `ModuleNotFoundError` | Run `pip install -r requirements.txt` |
+| Neo4j not connecting | `docker compose up -d`, wait 20 sec, retry |
+| `Client.__init__() got an unexpected keyword argument 'proxies'` | `pip install --upgrade anthropic httpx` |
+| `API key is not scoped to a workspace` | Go to console.anthropic.com → delete key → create a new one |
+| API key error | Open `.env` — no quotes around key, no trailing spaces |
+| `ModuleNotFoundError` | `pip install -r requirements.txt` |
 
 ---
 
-## Step 1 — What is RAG? (0:15–0:45)
+# PART 1 — Why We Need This (0:15–0:45)
 
-### The problem with plain LLMs
+---
 
-Ask ChatGPT something time-sensitive and it might be confidently wrong.
-That's not a bug — language models memorise patterns from training data.
-They don't look things up.
+## 📖 The problem with plain LLMs
 
-### What RAG does
+Ask ChatGPT: *"What is the latest iPhone model?"*
 
-**R**etrieval-**A**ugmented **G**eneration — before the LLM answers,
-fetch relevant context and include it in the prompt.
+It answers confidently — but its knowledge has a **cutoff date**.
+It might be wrong. It can't tell you when it's wrong.
+
+**Why?** The LLM memorised patterns from training data.
+It doesn't *look things up* — it *remembers* (imperfectly).
+
+---
+
+## 📖 What is RAG?
+
+**R**etrieval-**A**ugmented **G**eneration
+
+The fix: before the LLM answers, *fetch relevant context* and include it in the prompt.
 
 ```
-question → [retrieve relevant chunks] → [question + chunks] → LLM → answer
+Your question
+     ↓
+[Retrieval step] — find relevant documents / chunks
+     ↓
+Augmented prompt = question + retrieved context
+     ↓
+LLM generates answer grounded in that context
 ```
 
-### Where RAG falls short
+**How retrieval works:**
+1. Split documents into chunks, turn each chunk into a vector (embedding)
+2. Turn your question into a vector
+3. Find the chunks most similar to your question
+4. Pass them to the LLM as context
 
-RAG retrieves *similar text* — it doesn't retrieve *structured relationships*.
+RAG is great for: answering questions about documents, summarising PDFs, "chat with your codebase."
 
-> "Which companies make products that compete with the iPhone?"
+---
 
-To answer this from documents you'd need to find every mention of iPhone competitors,
-resolve that Samsung Galaxy and Google Pixel are products, and know they are made by
-different companies. Vector search can't do that reliably.
+## 📖 Where RAG falls short
 
-### The fix — Knowledge Graphs
+RAG retrieves *similar text*. It doesn't retrieve *structured relationships*.
+
+> *"Which companies make products that compete with the iPhone?"*
+
+To answer this from documents you'd need to:
+- Find every mention of iPhone competitors across thousands of pages
+- Figure out that Samsung Galaxy and Google Pixel are products
+- Know they are made by different companies
+
+Vector search can't do this reliably. The answer isn't in a paragraph — it's in the **connections** between things.
+
+| Question type | RAG | Knowledge Graph |
+|---|---|---|
+| "What does this document say about X?" | ✓ | — |
+| "Who is related to whom?" | ✗ | ✓ |
+| "What are all products made by company X?" | ✗ | ✓ |
+| "Find the path between A and B" | ✗ | ✓ |
+| "Count or rank things" | ✗ | ✓ |
+
+---
+
+## 📖 The fix — GraphRAG
 
 Instead of retrieving text chunks, retrieve **graph facts**:
 
 ```
-question
-  → LLM translates question to a graph query
-  → Graph database returns exact facts + relationships
-  → LLM turns results into a plain English answer
+Your question
+     ↓
+LLM translates question → structured graph query
+     ↓
+Graph database returns exact facts + relationships
+     ↓
+LLM turns results into a plain English answer
 ```
 
-This is **GraphRAG** — what we build today.
+This is **GraphRAG** — and it's what we build today.
 
-✅ Concept clear? Move to Step 2.
+The journey:
+```
+Plain LLM  →  fast but makes things up
+    ↓
+RAG        →  grounded in documents, but misses relationships
+    ↓
+GraphRAG   →  grounded in structured facts + relationships  ← we build this
+```
 
 ---
 
-## Step 2 — Knowledge Graphs 101 (0:45–1:15)
+## 👀 DEMO — feel the difference
 
-### Three building blocks
+Watch the presenter ask the same question two ways:
 
-**Node** — a thing
+**Plain LLM answer:** generic, possibly stale, no structure
+
+**GraphRAG answer:**
 ```
-(Apple:Company {name:"Apple", founded:1976})
-(iPhone:Product {name:"iPhone", category:"smartphone"})
+Q: Which Google products compete with Microsoft products?
+
+From the knowledge graph:
+  - Android      ↔ Windows
+  - Google Cloud ↔ Azure
+  - Gemini       ↔ Copilot
+  - VS Code      ↔ Xcode (via Google's dev tools)
 ```
 
-**Relationship** — a directed connection with a type
+Precise. Structured. Grounded in data you control.
+
+✅ You understand why we need a Knowledge Graph. Move to Part 2.
+
+---
+
+# PART 2 — Knowledge Graphs 101 (0:45–1:00)
+
+---
+
+## 📖 Three building blocks
+
+A Knowledge Graph stores information as **things** and **relationships between things**.
+
+### 1. Node — a thing
+
 ```
+(Apple:Company  {name:"Apple",  founded:1976, hq:"Cupertino"})
+(iPhone:Product {name:"iPhone", category:"smartphone", launched:2007})
+(Steve Jobs:Person {name:"Steve Jobs"})
+```
+
+- The label (`:Company`, `:Product`) is the *type*
+- `{}` contains properties — key-value facts about this thing
+- Every node has an internal ID
+
+### 2. Relationship — a connection
+
+```
+(Steve Jobs)-[:FOUNDED]->(Apple)
 (Apple)-[:MAKES]->(iPhone)
+(iPhone)-[:COMPETES_WITH]->(Android)
 ```
 
-**Property** — a key-value on a node or relationship
+- Always has a **direction** — the arrow matters
+- The type is in `[:UPPERCASE_SNAKE]`
+- Relationships can also have properties: `[:FOUNDED {year:1976}]`
+
+### 3. Property — a fact
+
 ```
-(Apple)-[:MAKES {since:2007}]->(iPhone)
+(Apple {name:"Apple", founded:1976, hq:"Cupertino"})
 ```
 
-### Why graphs beat tables for connected data
+Simple key-value pairs. Put facts here when you don't need to traverse them.
 
-In a relational database, finding "what products are made by companies founded by Elon Musk"
-needs 3 JOINs and a subquery.
+---
 
-In a graph — follow the arrows:
+## 📖 Why graphs beat tables for connected data
+
+**In a relational database**, finding "products made by companies founded by Elon Musk" needs:
+```sql
+SELECT p.name FROM products p
+JOIN company_products cp ON p.id = cp.product_id
+JOIN companies c ON cp.company_id = c.id
+JOIN founders f ON c.id = f.company_id
+WHERE f.name = 'Elon Musk'
+```
+
+**In a graph** — just follow the arrows:
 ```
 (Elon Musk)-[:FOUNDED]->(Company)-[:MAKES]->(Product)
 ```
 
-### Our graph today
-
-```
-(Person) ──[:FOUNDED]──> (Company) ──[:MAKES]──> (Product)
-(Person) ──[:CEO_OF]───> (Company)
-(Company)──[:ACQUIRED]─> (Company)
-(Product)──[:COMPETES_WITH]──> (Product)
-```
-
-Real data:
-- Companies: Apple, Google, Microsoft, Amazon, Meta, OpenAI, Anthropic, Nvidia, Tesla
-- People: Steve Jobs, Elon Musk, Sam Altman, Jensen Huang, Mark Zuckerberg
-- Products: iPhone, Android, Windows, AWS, ChatGPT, Claude, Gemini, VS Code...
-
-✅ Concept clear? Move to Exercise 1.
+The more hops, the bigger the gap. Graphs are built for this.
 
 ---
 
-## Exercise 1 — Your First Graph (1:00–1:15)
+## 📖 Our graph today
 
-### Run the starter file
+```
+(Person) ──[:FOUNDED]──────> (Company) ──[:MAKES]──> (Product)
+(Person) ──[:CEO_OF]───────> (Company)
+(Company)──[:ACQUIRED]─────> (Company)
+(Product)──[:COMPETES_WITH]─>(Product)
+```
+
+**Real data we'll use:**
+- Companies: Apple, Google, Microsoft, Amazon, Meta, OpenAI, Anthropic, Nvidia, Tesla, SpaceX
+- People: Steve Jobs, Steve Wozniak, Bill Gates, Jeff Bezos, Mark Zuckerberg, Elon Musk, Sam Altman, Jensen Huang, Sundar Pichai, Dario Amodei
+- Products: iPhone, MacBook, Android, Windows, AWS, Azure, ChatGPT, Claude, Gemini, VS Code, GitHub, and more...
+
+---
+
+## 👀 DEMO — your first Cypher in the browser
+
+Watch the presenter type this in the Neo4j browser at http://localhost:7474:
+
+```cypher
+CREATE (apple:Company {name:"Apple"})-[:MAKES]->(iphone:Product {name:"iPhone"})
+RETURN apple, iphone
+```
+
+Two nodes appear. One arrow. That's a Knowledge Graph.
+
+```cypher
+MATCH (apple:Company {name:"Apple"})
+CREATE (jobs:Person {name:"Steve Jobs"})-[:FOUNDED]->(apple)
+RETURN jobs, apple
+```
+
+The graph grows by connection — Apple already existed, we just linked Steve Jobs to it.
+
+✅ You understand nodes, relationships, and properties. Move to Exercise 1.
+
+---
+
+# PART 3 — Exercise 1: Your First Graph (1:00–1:15)
+
+---
+
+## 💻 Run the starter file
 
 ```bash
 python exercises/01-basics/exercise.py
 ```
 
-✅ You should see:
+✅ You see:
 ```
 Hello, graph!
 Companies created — check http://localhost:7474
 Products linked!
 ```
 
-### See it in the browser
+---
 
-Open http://localhost:7474 and run:
+## 💻 See it in the Neo4j browser
 
+Open **http://localhost:7474** and run:
 ```cypher
 MATCH (c:Company)-[:MAKES]->(p:Product) RETURN c, p
 ```
 
-✅ You should see a small graph with nodes and arrows.
+✅ A small graph appears — Apple and Google with their products connected by arrows.
+Click on a node to see its properties.
 
-### Your turn — add a founder
+---
 
-Open `exercises/01-basics/exercise.py` and fill in the TODOs at the bottom:
-- Create a `Person` node for `"Steve Jobs"`
-- Create a `[:FOUNDED]` relationship: Steve Jobs → Apple
+## 💻 Your turn — add Steve Jobs
+
+Open `exercises/01-basics/exercise.py` in your editor.
+Scroll to the bottom — you'll see the TODO section.
+
+You need to:
+1. Write a `create_person(tx, name)` function that creates a `Person` node
+2. Write a `link_founder(tx, person_name, company_name)` function that creates a `[:FOUNDED]` relationship
+3. Call both to link `"Steve Jobs"` → `"Apple"`
+
+**Hint — the pattern looks like this:**
+```python
+def create_person(tx, name):
+    tx.run("MERGE (:Person {name: $name})", name=name)
+
+def link_founder(tx, person_name, company_name):
+    tx.run(
+        "MATCH (p:Person {name:$person_name}), (c:Company {name:$company_name}) "
+        "MERGE (p)-[:FOUNDED]->(c)",
+        person_name=person_name, company_name=company_name,
+    )
+```
 
 When done, re-run the file:
 ```bash
 python exercises/01-basics/exercise.py
 ```
 
-Then verify in the browser:
-
+Verify in the browser:
 ```cypher
 MATCH (p:Person)-[:FOUNDED]->(c:Company) RETURN p, c
 ```
 
-✅ Steve Jobs node appears connected to Apple.
+✅ Steve Jobs appears connected to Apple.
 
-**Stuck?** The solution is in `exercises/01-basics/solution.py`.
-
----
-
-## ☕ Break (1:15–1:30)
+**Stuck?** Full solution in `exercises/01-basics/solution.py`
 
 ---
 
-## Step 3 — Modeling Real-World Information (1:30–1:40)
+# ☕ Break (1:15–1:30)
 
-### The most important modeling question
+---
 
-> "What questions do I need to answer?"
+# PART 4 — Modeling Real-World Information (1:30–1:45)
 
-Model around your queries — not around your data source.
+---
 
-### Do this, not that
+## 📖 Modeling is a design skill
+
+There is no single "correct" graph model.
+Good modeling asks one question: **what do I need to answer?**
+
+Design around your queries — not around your data source.
+
+**The three questions to ask before you model anything:**
+1. What are my entities? → these become **nodes**
+2. How are they related? → these become **relationships**
+3. What do I need to know about each? → these become **properties**
+
+---
+
+## 📖 Good habits vs. common mistakes
 
 | Do | Don't |
 |----|-------|
 | Use nouns for node labels | Use verbs as labels |
-| Use UPPER_SNAKE for relationship types | Use generic `RELATED_TO` |
-| Put simple facts as properties | Turn every property into a node |
-| Model for traversal | Mirror your source data structure |
+| Use `UPPER_SNAKE` for relationship types | Use vague `RELATED_TO` for everything |
+| Put simple facts as properties on nodes | Turn every property into its own node |
+| Model for the queries you need | Mirror your source data structure blindly |
 
-### The hard truth about AI-generated graphs
+**Mistake 1 — over-normalising:**
+```
+❌  (iPhone)-[:HAS_ATTRIBUTE]->(Attribute {key:"category", value:"smartphone"})
+✓   (iPhone:Product {name:"iPhone", category:"smartphone"})
+```
 
-You might think: "I'll just get an AI to build my Knowledge Graph automatically."
+**Mistake 2 — vague relationships:**
+```
+❌  (Apple)-[:RELATED_TO]->(iPhone)
+✓   (Apple)-[:MAKES]->(iPhone)
+```
 
-Here's the reality: **90–95% of AI-generated tuples are useless** for the specific
-questions you actually need to answer. You end up with:
-- Duplicates (`Apple Inc.` vs `Apple` vs `apple`)
-- Orphan nodes nothing connects to
-- 40 relationship types that mean the same thing
-- Relationships that are true but answer no useful question
-
-The dataset we're using today is small and intentional — every node is reachable,
-every relationship is queryable. That's the result of design, not automation.
-
-> A small, intentional graph beats a large, AI-generated one every time.
-
-✅ Concept clear? Move to Exercise 2.
+Relationship types are your vocabulary. Rich types = richer queries.
 
 ---
 
-## Exercise 2 — Load the Full Dataset (1:40–2:00)
+## 📖 The hard truth — AI won't build this for you
 
-### Clear previous data
+You might think: *"I'll just get an AI to generate my Knowledge Graph automatically."*
 
+Here's the reality: **90–95% of AI-generated tuples are useless** for the specific questions you actually need to answer.
+
+The LLM will give you:
+- Duplicates (`Apple Inc.` vs `Apple` vs `apple` — three separate nodes)
+- Orphan nodes nothing connects to
+- 40 relationship types that mean the same thing
+- Relationships that are technically true but answer no useful question
+
+All of it *looks* like a graph. None of it *behaves* like one.
+
+The dataset we're using today is intentionally small — 10 companies, 10 people, 25 products, 5 relationship types. Every node is reachable. Every relationship is queryable. That's the result of **design**, not automation.
+
+> A small, intentional graph beats a large, AI-generated one every time.
+> — Occam's Razor applied to Knowledge Graphs
+
+---
+
+## 💻 Exercise 2 — Load the full dataset (1:45–2:00)
+
+First, clear what we created in Exercise 1.
 In the Neo4j browser run:
 ```cypher
 MATCH (n) DETACH DELETE n
 ```
 
-### Seed the full dataset
-
+Now seed the full dataset:
 ```bash
 python exercises/02-modeling/seed.py
 ```
 
-✅ You should see:
+✅ You see:
 ```
 Seeding companies...    ✓ 10 companies
 Seeding people...       ✓ 10 people
@@ -283,81 +459,178 @@ Seeding relationships...  ✓ done
 Graph is ready! Open http://localhost:7474
 ```
 
-### Explore in the browser
-
+In the Neo4j browser run:
 ```cypher
 MATCH (n) RETURN n LIMIT 60
 ```
 
-✅ A rich connected graph fills the screen — companies, people, products, all linked.
+✅ A rich connected graph fills the screen — the entire tech world in a graph.
 
 ---
 
-## Exercise 3 — Querying the Graph (2:00–2:30)
+# PART 5 — Querying with Cypher (2:00–2:30)
 
-### Run all queries
+---
 
-```bash
-python exercises/03-querying/queries.py
+## 📖 Meet Cypher
+
+Neo4j's query language. Designed to look like the graph itself — you can almost read it as a sentence.
+
+```cypher
+MATCH (c:Company)-[:MAKES]->(p:Product)
+WHERE c.name = "Apple"
+RETURN p.name
 ```
 
-### Or run them one by one in the Neo4j browser
+*"Find a Company that MAKES a Product, where the company is Apple — return the product name."*
 
-**Basic lookup:**
+**The core structure:**
+```cypher
+MATCH  (pattern)        -- what shape to find in the graph
+WHERE  condition        -- optional filter
+RETURN what you want    -- what to output
+```
+
+---
+
+## 👀 DEMO — watch these queries run live
+
+Follow along in your own Neo4j browser at http://localhost:7474.
+
+**Query 1 — basic lookup:**
 ```cypher
 MATCH (c:Company {name:"Apple"})-[:MAKES]->(p:Product)
 RETURN p.name, p.category, p.launched
 ORDER BY p.launched
 ```
 
-**Multi-hop — follow the arrows:**
+**Query 2 — multi-hop (this is where graphs shine):**
 ```cypher
 MATCH (person:Person {name:"Elon Musk"})-[:FOUNDED]->(c:Company)-[:MAKES]->(p:Product)
 RETURN c.name AS company, p.name AS product
 ```
+Two hops. In SQL this would be two JOINs. Here it's one line.
 
-**Competition network:**
+**Query 3 — competition network:**
 ```cypher
 MATCH (aws:Product {name:"AWS"})-[:COMPETES_WITH]->(comp:Product)<-[:MAKES]-(c:Company)
 RETURN c.name AS made_by, comp.name AS product
 ```
+Forward to the competitor, then backwards to find who makes it.
 
-**Ranking:**
+**Query 4 — ranking:**
 ```cypher
 MATCH (c:Company)-[:MAKES]->(p:Product)
 RETURN c.name, COUNT(p) AS num_products
 ORDER BY num_products DESC
 ```
 
-**AI products since 2022:**
-```cypher
-MATCH (p:Product)
-WHERE p.category = "AI" AND p.launched >= 2022
-RETURN p.name, p.launched
-ORDER BY p.launched
+---
+
+## 💻 Exercise 3 — Run the queries yourself (2:10–2:30)
+
+```bash
+python exercises/03-querying/queries.py
 ```
 
-✅ All queries return results.
+✅ All 5 queries return results in your terminal.
 
-### Your turn — two challenges
+**Now try these two challenges on your own in the Neo4j browser:**
 
 **Challenge 1:** Which companies have both a cloud product AND an AI product?
+```cypher
+-- Hint: use two MATCH patterns on the same company node
+MATCH (c:Company)-[:MAKES]->(cloud:Product {category:"cloud"})
+MATCH (c)-[:MAKES]->(ai:Product {category:"AI"})
+RETURN c.name, cloud.name AS cloud_product, ai.name AS ai_product
+```
 
-**Challenge 2:** Who is the CEO of a company that was founded by someone else?
+**Challenge 2:** Who is CEO of a company that was founded by someone else?
+```cypher
+-- Hint: match both relationships on the same company, check they're different people
+MATCH (ceo:Person)-[:CEO_OF]->(c:Company)<-[:FOUNDED]-(founder:Person)
+WHERE ceo <> founder
+RETURN ceo.name AS ceo, c.name AS company, founder.name AS founder
+```
 
-**Hints in `exercises/03-querying/README.md` if you get stuck.**
+✅ Both challenges return results.
 
 ---
 
-## Exercise 4 — Connect the LLM (2:30–3:00)
+# PART 6 — Connecting the LLM (2:30–3:00)
 
-### Run the Q&A assistant
+---
+
+## 📖 The missing piece
+
+We now have:
+- ✓ A Knowledge Graph with real data
+- ✓ Cypher queries that answer structured questions
+
+What's missing:
+- ✗ A way for anyone to ask questions in plain English
+
+**Solution: let the LLM translate natural language → Cypher → answer**
+
+---
+
+## 📖 The GraphRAG pipeline
+
+```
+Your question: "Which companies make AI products?"
+          ↓
+LLM Call 1 — translate to Cypher:
+  "MATCH (c:Company)-[:MAKES]->(p:Product)
+   WHERE p.category = 'AI'
+   RETURN c.name, p.name"
+          ↓
+Neo4j runs the query:
+  [{company:"OpenAI", product:"ChatGPT"},
+   {company:"Google", product:"Gemini"}, ...]
+          ↓
+LLM Call 2 — synthesise answer:
+  "Companies making AI products include OpenAI (ChatGPT),
+   Google (Gemini), Microsoft (Copilot), and Anthropic (Claude)."
+```
+
+Two LLM calls:
+- **Call 1** is a translator — question → Cypher
+- **Call 2** is a writer — raw results → plain English
+
+The graph does the heavy lifting in the middle.
+**The LLM never makes up facts — it only formats what the graph returns.**
+
+---
+
+## 📖 Why this works — the schema prompt
+
+The LLM knows how to write Cypher because we tell it the graph's structure:
+
+```python
+SCHEMA = """
+Nodes: Company {name, founded, hq}
+       Product {name, category, launched}
+       Person  {name}
+
+Relationships:
+  (Person)-[:FOUNDED]->(Company)
+  (Person)-[:CEO_OF]->(Company)
+  (Company)-[:MAKES]->(Product)
+  (Product)-[:COMPETES_WITH]->(Product)
+"""
+```
+
+Better schema prompt = better Cypher = better answers.
+
+---
+
+## 💻 Exercise 4 — Run the Q&A assistant (2:40–3:00)
 
 ```bash
 python exercises/04-llm-integration/exercise.py
 ```
 
-### Ask these questions one by one
+Ask these questions one at a time and watch the **Generated Cypher** panel:
 
 ```
 What products does Microsoft make?
@@ -367,72 +640,87 @@ Which company makes the most products?
 What cloud products exist and who makes them?
 ```
 
-Watch the **Generated Cypher** panel — the LLM is writing the query for you.
+✅ You get plain English answers grounded in graph data — not guesses.
 
-✅ You get a plain English answer grounded in graph data — not a guess.
-
-### What just happened
-
-```
-Your question
-    → LLM call 1: translates to Cypher
-    → Neo4j runs the query
-    → LLM call 2: turns results into plain English
-    → Answer
-```
-
-The LLM never makes up facts — it only formats what the graph returns.
+**Now ask your own question.** What do you want to know about the tech world?
 
 ---
 
-## Step 4 — End-to-End Project (3:00–3:30)
+# PART 7 — End-to-End Project (3:00–3:30)
 
-### Run the complete assistant
+---
+
+## 💻 Run the complete assistant
 
 ```bash
 python project/src/assistant.py demo
 ```
 
-This runs 8 pre-written questions automatically. Watch the full pipeline in action.
+This runs 8 pre-written questions end to end. Watch the full pipeline:
+question → Cypher → graph results → answer.
 
-### Switch to interactive mode
-
+Then switch to interactive mode:
 ```bash
 python project/src/assistant.py
 ```
 
-Ask anything:
+Try these:
 ```
 Who founded companies that make AI products?
 Which company has the most competition across its products?
 What did Elon Musk's companies build?
-Which cloud platforms are there and who runs them?
+Which cloud platforms exist and who runs them?
 ```
 
-✅ You just built a GraphRAG system end to end.
+✅ You just built a GraphRAG system — end to end.
 
 ---
 
-## What you built today
+## 📖 What you built today
 
 | Component | Technology | What it does |
 |-----------|-----------|--------------|
 | Graph database | Neo4j | Stores entities and relationships |
-| Query language | Cypher | Traverses the graph |
-| LLM integration | Anthropic Claude | Translates questions → Cypher → answers |
-| Data model | Custom designed | 10 companies, 10 people, 25 products |
+| Query language | Cypher | Traverses the graph with pattern matching |
+| LLM — Call 1 | Claude Haiku | Translates natural language → Cypher |
+| LLM — Call 2 | Claude Haiku | Synthesises graph results → plain English |
+| Data model | Custom designed | 10 companies, 10 people, 25 products, 5 relationship types |
 
-**What to call this on your resume:**
-- GraphRAG system
-- Knowledge Graph with Neo4j and Cypher
-- Text-to-Cypher LLM pipeline
-- Multi-hop reasoning over structured data
+---
+
+## 📖 What to call this on your resume
+
+- **GraphRAG system** — LLM-powered Q&A over a property graph
+- **Knowledge Graph with Neo4j and Cypher** — graph database modeling and querying
+- **Text-to-Cypher pipeline** — natural language to structured graph queries via LLM
+- **Multi-hop reasoning** — answering questions that require traversing chains of relationships
+
+---
+
+## 📖 The skill that matters
+
+Anyone can `pip install neo4j` and call an LLM API.
+
+The skill — the thing worth putting on your resume — is:
+- Knowing *what* to model and *why*
+- Understanding *when* a graph beats vector search
+- Recognising when a relationship adds value vs. noise
+- Designing a graph that answers tomorrow's questions, not just today's
+
+That judgment only comes from doing the work. You did it today.
 
 ---
 
 ## What's next
 
-- `references/cypher-cheatsheet.md` — every Cypher pattern on one page
-- `references/further-reading.md` — courses, books, production patterns
-- Add a second domain to this graph (movies, your company's products, research papers)
-- Explore [Neo4j Graph Academy](https://graphacademy.neo4j.com) — free, structured courses
+| Resource | What's in it |
+|----------|-------------|
+| `references/cypher-cheatsheet.md` | Every Cypher pattern on one page |
+| `references/further-reading.md` | Courses, books, production patterns, resume keywords |
+| Neo4j Graph Academy | Free structured courses — graphacademy.neo4j.com |
+| Microsoft GraphRAG | Production open-source GraphRAG — github.com/microsoft/graphrag |
+
+**Best next step:** Add a second domain to this graph.
+Pick anything — movies, your company's products, a research paper corpus.
+The pattern is the same: entities → relationships → questions.
+Once you've done it twice it becomes instinct.
