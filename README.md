@@ -21,9 +21,9 @@ The answer comes from a **Knowledge Graph** — structured, relationship-aware d
 not from the LLM's training memory. That means it's accurate, explainable, and yours
 to control.
 
----
+> **During the session — open [`WORKSHOP.md`](WORKSHOP.md) and follow it top to bottom.**
 
-## Schedule
+---
 
 | Time | Block | Format |
 |------|-------|--------|
