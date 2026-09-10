@@ -534,74 +534,26 @@ MATCH (a:Company)-[:ACQUIRED]->(b) RETURN a, b
 
 ---
 
-# PART 5 — Querying with Cypher (2:00–2:30)
+# PART 5 — Exercise 3: Querying the Graph (2:00–2:30)
+
+You've already written Cypher in Exercise 1 and explored the graph in Exercise 2.
+Now let's run more powerful queries and see multi-hop traversal in action.
 
 ---
 
-## 📖 Meet Cypher
-
-Neo4j's query language. Designed to look like the graph itself — you can almost read it as a sentence.
-
-```cypher
-MATCH (c:Company)-[:MAKES]->(p:Product)
-WHERE c.name = "Apple"
-RETURN p.name
-```
-
-*"Find a Company that MAKES a Product, where the company is Apple — return the product name."*
-
-**The core structure:**
-```cypher
-MATCH  (pattern)        -- what shape to find in the graph
-WHERE  condition        -- optional filter
-RETURN what you want    -- what to output
-```
-
----
-
-## 👀 DEMO — watch these queries run live
-
-Follow along in your own Neo4j browser at http://localhost:7474.
-
-**Query 1 — basic lookup:**
-```cypher
-MATCH (c:Company {name:"Apple"})-[:MAKES]->(p:Product)
-RETURN p.name, p.category, p.launched
-ORDER BY p.launched
-```
-
-**Query 2 — multi-hop (this is where graphs shine):**
-```cypher
-MATCH (person:Person {name:"Elon Musk"})-[:FOUNDED]->(c:Company)-[:MAKES]->(p:Product)
-RETURN c.name AS company, p.name AS product
-```
-Two hops. In SQL this would be two JOINs. Here it's one line.
-
-**Query 3 — competition network:**
-```cypher
-MATCH (aws:Product {name:"AWS"})-[:COMPETES_WITH]->(comp:Product)<-[:MAKES]-(c:Company)
-RETURN c.name AS made_by, comp.name AS product
-```
-Forward to the competitor, then backwards to find who makes it.
-
-**Query 4 — ranking:**
-```cypher
-MATCH (c:Company)-[:MAKES]->(p:Product)
-RETURN c.name, COUNT(p) AS num_products
-ORDER BY num_products DESC
-```
-
----
-
-## 💻 Exercise 3 — Run the queries yourself (2:10–2:30)
+## 💻 Run the query suite
 
 ```bash
 python exercises/03-querying/queries.py
 ```
 
+This runs 5 queries, each explained inline. Watch the output — especially Query 2 and Query 3 where we traverse multiple relationships in one go.
+
 ✅ All 5 queries return results in your terminal.
 
-**Now try these two challenges on your own in the Neo4j browser:**
+---
+
+## 💻 Two challenges — try these in the Neo4j browser
 
 **Challenge 1:** Which companies have both a cloud product AND an AI product?
 ```cypher
