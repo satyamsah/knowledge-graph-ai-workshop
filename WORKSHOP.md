@@ -175,7 +175,23 @@ GraphRAG   →  grounded in structured facts + relationships  ← we build this
 
 ---
 
-## 👀 DEMO — feel the difference
+## 📖 The three approaches — and why we need all three
+
+| Approach | Data source | Handles relationships? | Trustworthy? |
+|---|---|---|---|
+| Plain LLM | Training memory | ❌ No | ❌ No source |
+| RAG | Text chunks | ⚠ Weak | ⚠ Hard to verify |
+| GraphRAG | Knowledge graph | ✅ Yes | ✅ Traceable facts |
+
+**Plain LLM** — fast, but answers from memory. Could be wrong, outdated, no source.
+
+**RAG** — retrieves relevant text passages and passes them to the LLM. Better. But text passages can't tell you *which company makes which competing product* — that information is in the *connections*, not the text.
+
+**GraphRAG** — queries structured facts and relationships directly. Precise, explainable, and grounded in data you control.
+
+---
+
+## 👀 DEMO — see all three live
 
 First load the dataset so the graph has data:
 
@@ -198,9 +214,9 @@ Now run the comparison:
 python demos/rag_vs_graph.py
 ```
 
-This asks the same three questions two ways — plain LLM vs GraphRAG.
-Watch the plain LLM answer from memory (possibly wrong, no source).
-Then watch GraphRAG answer from structured data you control.
+Watch the same question answered three ways.
+Pay attention to the RAG chunks — notice they are text fragments that don't give you structured company → product relationships.
+Then watch GraphRAG return an exact structured answer.
 
 That difference is what we spend today building.
 
