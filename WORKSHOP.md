@@ -69,6 +69,7 @@ python check_setup.py
 
 | Error | Fix |
 |-------|-----|
+| `Client.__init__() got an unexpected keyword argument 'proxies'` | Run `pip install --upgrade anthropic httpx` |
 | `command not found: python` | Use `python3` instead |
 | `source: no such file or directory: .venv` | Run `python3 -m venv .venv` first |
 | Neo4j not connecting | `docker compose up -d`, wait 20 seconds, retry |
