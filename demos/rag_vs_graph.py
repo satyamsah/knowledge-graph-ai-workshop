@@ -37,20 +37,23 @@ neo4j_driver = GraphDatabase.driver(
 
 # ── Simulated document corpus for RAG ────────────────────────────────────
 #
-# In real RAG you would embed these chunks and do vector search.
-# Here we simulate it — we pick the "most relevant" chunks by keyword match.
-# This is honest: it shows what RAG actually retrieves — text fragments.
-# The point is to show that text fragments can't answer relationship questions.
+# Key design decision: cloud and AI facts for the same company are
+# intentionally split across SEPARATE documents.
+# This mirrors real-world RAG — information about one entity is scattered
+# across many documents. RAG retrieves top-k chunks independently and
+# cannot JOIN facts across chunks for the same entity.
+# The graph answers this trivially because relationships are explicit.
 #
 DOCUMENTS = [
-    "Microsoft Azure is a leading cloud computing platform. "
-    "Microsoft also makes Copilot, an AI assistant powered by GPT-4.",
+    "Microsoft Azure is one of the leading cloud computing platforms used by enterprises worldwide.",
 
-    "Google offers Google Cloud for enterprise cloud computing. "
-    "Google also developed Gemini, its large language model and AI product.",
+    "Microsoft Copilot is an AI assistant integrated into Office 365 and Windows products.",
 
-    "Amazon Web Services (AWS) is a cloud computing platform offered by Amazon. "
-    "It provides services like EC2, S3, and Lambda. AWS is the market leader in cloud.",
+    "Google Cloud Platform provides infrastructure and data services to thousands of businesses.",
+
+    "Google Gemini is a large language model developed by Google DeepMind for AI applications.",
+
+    "Amazon Web Services (AWS) is the market leader in cloud computing, offering EC2, S3, and Lambda.",
 
     "Microsoft offers many products including Windows, Azure, GitHub, VS Code, and Copilot. "
     "Copilot is an AI assistant integrated into Microsoft products.",
