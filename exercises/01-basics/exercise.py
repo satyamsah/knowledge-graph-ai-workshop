@@ -30,6 +30,12 @@ def create_company(tx, name, founded, hq):
         "ON CREATE SET c.founded = $founded, c.hq = $hq",
         name=name, founded=founded, hq=hq,
     )
+def link_founder(tx, person_name, company_name):
+    tx.run(
+       "MATCH (p:Person {name: $person_name}), (c:Company{name: $company_name})"
+       "MERGE (p)-[FOUNDED] ->(c)",
+       person_name=person_name, company_name=company_name,
+    )
 
 with driver.session() as session:
     session.execute_write(create_company, "Apple",  1976, "Cupertino")
@@ -58,6 +64,7 @@ with driver.session() as session:
 
 # ── Step 4: YOUR TURN ──────────────────────────────────────────────────────
 # TODO 1: Write a function create_person(tx, name) that MERGEs a Person node.
+    session.execute_write(create_company, "Steve Jobs",  "Apple", "Cupertino")
 
 # TODO 2: Write a function link_founder(tx, person_name, company_name) that
 #         MERGEs a (Person)-[:FOUNDED]->(Company) relationship.
