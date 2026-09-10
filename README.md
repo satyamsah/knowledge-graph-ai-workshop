@@ -42,7 +42,7 @@ to control.
 
 | Requirement | Notes |
 |-------------|-------|
-| Python 3.10+ | `python --version` to check |
+| Python 3.10+ | `python3 --version` to check (Mac/Linux use `python3`) |
 | Docker Desktop | [docker.com/get-started](https://www.docker.com/get-started) |
 | Anthropic API key | [console.anthropic.com](https://console.anthropic.com) — free tier works |
 | A terminal | Any OS |
@@ -74,7 +74,7 @@ You should see the Neo4j Browser. Log in with:
 ### 3. Set up Python
 
 ```bash
-python -m venv .venv
+python3 -m venv .venv
 source .venv/bin/activate        # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 ```

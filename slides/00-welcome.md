@@ -47,26 +47,51 @@ GraphRAG       →  LLM + graph = accurate, relationship-aware answers  ← we b
 
 ## Slide 4 — Setup check
 
-Ask everyone to run:
+Run these one at a time together with the room:
 
 ```bash
+# 1. Start the database
+docker compose up -d
+
+# 2. Create Python environment (Mac/Linux use python3)
+python3 -m venv .venv
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
+
+# 3. Install dependencies
+pip install -r requirements.txt
+
+# 4. Add your API key
+cp .env.example .env
+# open .env and paste your ANTHROPIC_API_KEY
+
+# 5. Verify everything
 python check_setup.py
 ```
 
 Expected output:
 ```
-✓ Neo4j connected
+✓ Neo4j connected (localhost:7687)
 ✓ Anthropic API reachable
-✓ Ready for the workshop!
+✓ You're all set — see you at the workshop!
 ```
 
-> **If Neo4j fails:** `docker compose up -d` then wait 20 seconds and retry.
-> **If API fails:** open `.env` and paste your key.
+---
+
+## Common errors and fixes
+
+| Error | Fix |
+|-------|-----|
+| `command not found: python` | Use `python3` instead |
+| `source: no such file or directory: .venv/bin/activate` | Run `python3 -m venv .venv` first |
+| Neo4j not connecting | `docker compose up -d`, wait 20 seconds, retry |
+| API key error | Check `.env` has the key, no quotes, no trailing spaces |
+| `ModuleNotFoundError` | Run `pip install -r requirements.txt` |
 
 ---
 
 ## Facilitator notes
 
-- Do the setup check live on screen so people can follow along
-- Have a Slack/Discord/chat open for people to paste errors
-- If someone can't get Docker running: Neo4j AuraDB has a free cloud tier at aura.neo4j.io
+- Run each command live on your screen — participants follow along
+- Wait for the room before moving to the next command
+- Have a chat window open for people to paste errors
+- If someone can't get Docker running: Neo4j AuraDB free tier at aura.neo4j.io

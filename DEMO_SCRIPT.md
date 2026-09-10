@@ -12,7 +12,8 @@ Do this yourself before anyone arrives.
 # Start Neo4j
 docker compose up -d
 
-# Wait 20 seconds, then verify
+# Wait 20 seconds, then activate your environment and verify
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 python check_setup.py
 ```
 
@@ -39,11 +40,32 @@ Open two browser tabs:
 ### Everyone runs the setup check
 
 Say:
-> "First thing — let's make sure everyone's environment works before we write a single line of code. Run this:"
+> "First thing — let's get everyone's environment running. Follow along with me one command at a time."
 
 ```bash
+# 1. Start the database
+docker compose up -d
+
+# 2. Create Python environment (Mac/Linux)
+python3 -m venv .venv
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
+
+# 3. Install dependencies
+pip install -r requirements.txt
+
+# 4. Copy the env file and add your API key
+cp .env.example .env
+# open .env and paste your ANTHROPIC_API_KEY
+
+# 5. Verify
 python check_setup.py
 ```
+
+**If someone sees `command not found: python`:**
+> "On Mac use `python3` not `python` for the venv step — that's normal."
+
+**If someone sees `source: no such file or directory: .venv/bin/activate`:**
+> "You need to create the venv first — run `python3 -m venv .venv` then try again."
 
 **If someone gets a Neo4j error:**
 ```bash
