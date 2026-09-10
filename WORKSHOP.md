@@ -177,22 +177,17 @@ GraphRAG   →  grounded in structured facts + relationships  ← we build this
 
 ## 👀 DEMO — feel the difference
 
-Watch the presenter ask the same question two ways:
+Run this now and watch:
 
-**Plain LLM answer:** generic, possibly stale, no structure
-
-**GraphRAG answer:**
-```
-Q: Which Google products compete with Microsoft products?
-
-From the knowledge graph:
-  - Android      ↔ Windows
-  - Google Cloud ↔ Azure
-  - Gemini       ↔ Copilot
-  - VS Code      ↔ Xcode (via Google's dev tools)
+```bash
+python demos/rag_vs_graph.py
 ```
 
-Precise. Structured. Grounded in data you control.
+This asks the same three questions two ways — plain LLM vs GraphRAG.
+You will see the plain LLM answer from memory (possibly wrong, no source).
+You will see GraphRAG answer from structured data you control.
+
+That difference is what we spend today building.
 
 ✅ You understand why we need a Knowledge Graph. Move to Part 2.
 
