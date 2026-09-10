@@ -1,77 +1,130 @@
 """
-Exercise 1 — starter file.
-Fill in the TODOs, then run:  python exercises/01-basics/exercise.py
+Exercise 1 — Your First Graph
+================================
+In this exercise you will:
+  1. Connect to Neo4j from Python
+  2. Create your first nodes and relationships
+  3. See them appear in the browser
+
+Run:  python exercises/01-basics/exercise.py
+Then: open http://localhost:7474
 """
 
-from neo4j import GraphDatabase
 import os
 import warnings
-from dotenv import load_dotenv
-
-# suppress noisy shutdown warnings from the Neo4j driver on Python 3.14
 warnings.filterwarnings("ignore")
+from dotenv import load_dotenv
+from neo4j import GraphDatabase
 
 load_dotenv()
 
+# ── Connect to Neo4j ──────────────────────────────────────────────────────
+#
+# GraphDatabase.driver() opens a connection to Neo4j.
+# We read the connection details from the .env file.
+#
 driver = GraphDatabase.driver(
     os.getenv("NEO4J_URI", "bolt://localhost:7687"),
     auth=(os.getenv("NEO4J_USER", "neo4j"), os.getenv("NEO4J_PASSWORD", "workshop123")),
 )
 
-# ── Step 1: connectivity test ──────────────────────────────────────────────
+# ── Step 1: test the connection ───────────────────────────────────────────
+#
+# session.run() sends a Cypher query to Neo4j.
+# RETURN just sends back a value — like print() but in Cypher.
+#
 with driver.session() as session:
     result = session.run("RETURN 'Hello, graph!' AS message")
     print(result.single()["message"])
 
-# ── Step 2: create companies ───────────────────────────────────────────────
+# ── Step 2: create two Company nodes ─────────────────────────────────────
+#
+# MERGE = create this node if it doesn't exist, find it if it does.
+# :Company is the label (type of node).
+# {name: $name} is a property — $name is a parameter filled in by Python.
+#
+# We use execute_write() to wrap our function in a transaction.
+# A transaction means: do all of this, or none of it.
+#
 def create_company(tx, name, founded, hq):
     tx.run(
-        "MERGE (c:Company {name: $name}) "
-        "ON CREATE SET c.founded = $founded, c.hq = $hq",
+        """
+        MERGE (c:Company {name: $name})
+        ON CREATE SET c.founded = $founded, c.hq = $hq
+        """,
         name=name, founded=founded, hq=hq,
-    )
-def link_founder(tx, person_name, company_name):
-    tx.run(
-       "MATCH (p:Person {name: $person_name}), (c:Company{name: $company_name})"
-       "MERGE (p)-[FOUNDED] ->(c)",
-       person_name=person_name, company_name=company_name,
     )
 
 with driver.session() as session:
     session.execute_write(create_company, "Apple",  1976, "Cupertino")
     session.execute_write(create_company, "Google", 1998, "Mountain View")
-    print("Companies created — check http://localhost:7474")
+    print("✓ Companies created")
 
-# ── Step 3: create products and link them ─────────────────────────────────
-def create_product_and_link(tx, company_name, product_name, category, launched):
+# ── Step 3: create Products and link them to Companies ────────────────────
+#
+# This time we create two nodes AND a relationship in one query.
+#
+# MERGE (c:Company {name: $company}) — find the existing company
+# MERGE (p:Product {name: $name})    — create the product if it doesn't exist
+# MERGE (c)-[:MAKES]->(p)            — create the relationship between them
+#
+# [:MAKES] is the relationship type — always UPPER_SNAKE_CASE
+# The arrow -> shows direction: Company MAKES Product
+#
+def create_product(tx, company, name, category, launched):
     tx.run(
-        "MERGE (c:Company {name: $company_name}) "
-        "MERGE (p:Product {name: $product_name}) "
-        "ON CREATE SET p.category = $category, p.launched = $launched "
-        "MERGE (c)-[:MAKES]->(p)",
-        company_name=company_name,
-        product_name=product_name,
-        category=category,
-        launched=launched,
+        """
+        MERGE (c:Company  {name: $company})
+        MERGE (p:Product  {name: $name})
+        ON CREATE SET p.category = $category, p.launched = $launched
+        MERGE (c)-[:MAKES]->(p)
+        """,
+        company=company, name=name, category=category, launched=launched,
     )
 
 with driver.session() as session:
-    session.execute_write(create_product_and_link, "Apple",  "iPhone",  "smartphone", 2007)
-    session.execute_write(create_product_and_link, "Apple",  "MacBook", "laptop",     2006)
-    session.execute_write(create_product_and_link, "Google", "Search",  "web service",1998)
-    session.execute_write(create_product_and_link, "Google", "Android", "mobile OS",  2008)
-    print("Products linked!")
+    session.execute_write(create_product, "Apple",  "iPhone",  "smartphone", 2007)
+    session.execute_write(create_product, "Apple",  "MacBook", "laptop",     2006)
+    session.execute_write(create_product, "Google", "Search",  "web service",1998)
+    session.execute_write(create_product, "Google", "Android", "mobile OS",  2008)
+    print("✓ Products linked")
 
-# ── Step 4: YOUR TURN ──────────────────────────────────────────────────────
-# TODO 1: Write a function create_person(tx, name) that MERGEs a Person node.
-    session.execute_write(create_company, "Steve Jobs",  "Apple", "Cupertino")
+print("\nOpen http://localhost:7474 and run:")
+print('  MATCH (c:Company)-[:MAKES]->(p:Product) RETURN c, p')
 
-# TODO 2: Write a function link_founder(tx, person_name, company_name) that
-#         MERGEs a (Person)-[:FOUNDED]->(Company) relationship.
+# ── Step 4: YOUR TURN ─────────────────────────────────────────────────────
+#
+# Add Steve Jobs as the founder of Apple.
+#
+# You need to:
+#   a) Create a Person node for Steve Jobs
+#   b) Create a [:FOUNDED] relationship: (Steve Jobs)-[:FOUNDED]->(Apple)
+#
+# A Person node looks like this:
+#   MERGE (p:Person {name: $name})
+#
+# A FOUNDED relationship looks like this:
+#   MATCH (p:Person  {name: $person})
+#   MATCH (c:Company {name: $company})
+#   MERGE (p)-[:FOUNDED]->(c)
+#
+# Step a — fill in this function:
+def create_person(tx, name):
+    pass  # TODO: replace 'pass' with a tx.run() call that MERGEs a Person node
 
-# TODO 3: Call both functions to link "Steve Jobs" → "Apple".
+# Step b — fill in this function:
+def link_founder(tx, person, company):
+    pass  # TODO: replace 'pass' with a tx.run() call that MERGEs a [:FOUNDED] relationship
 
-# TODO 4: In the Neo4j browser verify with:
+# Step c — uncomment these lines once your functions are ready:
+# with driver.session() as session:
+#     session.execute_write(create_person, "Steve Jobs")
+#     session.execute_write(link_founder,  "Steve Jobs", "Apple")
+#     print("✓ Steve Jobs linked to Apple")
+
+# Step d — verify in the Neo4j browser:
 #   MATCH (p:Person)-[:FOUNDED]->(c:Company) RETURN p, c
+
+# ── Stuck? See exercises/01-basics/solution.py ────────────────────────────
 
 driver.close()
