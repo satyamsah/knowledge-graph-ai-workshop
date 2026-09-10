@@ -434,22 +434,67 @@ Relationship types are your vocabulary. Rich types = richer queries.
 
 ## 📖 The hard truth — AI won't build this for you
 
-You might think: *"I'll just get an AI to generate my Knowledge Graph automatically."*
+When people first hear about Knowledge Graphs and LLMs together, the natural reaction is:
 
-Here's the reality: **90–95% of AI-generated tuples are useless** for the specific questions you actually need to answer.
+> *"LLMs understand language and can extract information from text. So I'll just point an AI agent at my data, it'll pull out all the entities and relationships automatically, and I'll have a Knowledge Graph. How hard can it be?"*
 
-The LLM will give you:
-- Duplicates (`Apple Inc.` vs `Apple` vs `apple` — three separate nodes)
-- Orphan nodes nothing connects to
-- 40 relationship types that mean the same thing
-- Relationships that are technically true but answer no useful question
+This sounds reasonable. And it kind of works — the AI will generate a graph. The problem is **what it generates**.
 
-All of it *looks* like a graph. None of it *behaves* like one.
+The LLM doesn't know what questions you need to answer. So it extracts *everything* it can find. The result looks impressive. Hundreds of nodes, thousands of relationships. But when you start querying it, you discover most of it is noise.
 
-The dataset we're using today is intentionally small — 10 companies, 10 people, 25 products, 5 relationship types. Every node is reachable. Every relationship is queryable. That's the result of **design**, not automation.
+### A concrete example
+
+Say you feed this paragraph to an AI agent:
+
+> *"Apple was founded by Steve Jobs and Steve Wozniak in 1976 in a garage in Los Altos. Jobs was known for his obsession with design. The iPhone, launched in 2007, changed the smartphone industry. Apple's main competitor in smartphones is Samsung, which makes the Galaxy series."*
+
+The AI extracts something like this:
+
+```
+(Apple)-[:FOUNDED_BY]->(Steve Jobs)
+(Apple)-[:FOUNDED_BY]->(Steve Wozniak)
+(Apple)-[:FOUNDED_IN]->(1976)
+(Apple)-[:FOUNDED_IN]->(Los Altos)
+(Apple)-[:FOUNDED_IN]->(garage)          ← a garage is now a node
+(Steve Jobs)-[:KNOWN_FOR]->(design obsession)
+(Steve Jobs)-[:OBSESSED_WITH]->(design)  ← duplicate meaning
+(iPhone)-[:LAUNCHED_IN]->(2007)
+(iPhone)-[:CHANGED]->(smartphone industry)
+(Apple)-[:HAS_COMPETITOR]->(Samsung)
+(Samsung)-[:MAKES]->(Galaxy series)
+(Apple)-[:MAKES]->(iPhone)
+(iPhone)-[:COMPETES_WITH]->(Galaxy series)
+```
+
+Now ask: *"Which companies make competing products?"*
+
+Only 2 of those 13 relationships actually help answer it:
+```
+(Apple)-[:MAKES]->(iPhone)
+(iPhone)-[:COMPETES_WITH]->(Galaxy series)
+```
+
+The other 11 are noise — `FOUNDED_IN garage`, `KNOWN_FOR design obsession`,
+`CHANGED smartphone industry` — none of these help you traverse the graph for real questions.
+
+That's 85% noise from a single paragraph. Imagine running this over 10,000 documents.
+
+### What we designed instead
+
+```
+(Apple)-[:MAKES]->(iPhone)
+(iPhone)-[:COMPETES_WITH]->(Android)
+(Steve Jobs)-[:FOUNDED]->(Apple)
+```
+
+3 relationships. All queryable. No noise. That's the result of asking:
+**"What questions do I need to answer?"** before writing a single line of code.
+
+The dataset we're using today has 10 companies, 10 people, 25 products, and 5 relationship types. Every single node is reachable. Every single relationship answers a real question. Not because we used better AI — because we **designed it**.
 
 > A small, intentional graph beats a large, AI-generated one every time.
-> — Occam's Razor applied to Knowledge Graphs
+
+The hard work is the design work. And that's the valuable work — because anyone can call an API, but not everyone can look at a domain and know what structure will make it queryable.
 
 ---
 
