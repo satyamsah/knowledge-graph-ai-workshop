@@ -9,6 +9,8 @@ Usage:
 """
 
 import os
+import warnings
+warnings.filterwarnings("ignore")
 import re
 import sys
 from dotenv import load_dotenv

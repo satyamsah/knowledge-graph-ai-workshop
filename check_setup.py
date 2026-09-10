@@ -4,6 +4,8 @@ Run before the workshop:  python check_setup.py
 """
 
 import os
+import warnings
+warnings.filterwarnings("ignore")
 import sys
 from dotenv import load_dotenv
 

@@ -4,6 +4,8 @@ Run:  python exercises/03-querying/queries.py
 """
 
 import os
+import warnings
+warnings.filterwarnings("ignore")
 from dotenv import load_dotenv
 from neo4j import GraphDatabase
 from rich.console import Console

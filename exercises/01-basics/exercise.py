@@ -5,7 +5,11 @@ Fill in the TODOs, then run:  python exercises/01-basics/exercise.py
 
 from neo4j import GraphDatabase
 import os
+import warnings
 from dotenv import load_dotenv
+
+# suppress noisy shutdown warnings from the Neo4j driver on Python 3.14
+warnings.filterwarnings("ignore")
 
 load_dotenv()
 
