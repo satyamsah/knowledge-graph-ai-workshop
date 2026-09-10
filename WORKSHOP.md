@@ -177,15 +177,30 @@ GraphRAG   →  grounded in structured facts + relationships  ← we build this
 
 ## 👀 DEMO — feel the difference
 
-Run this now and watch:
+First load the dataset so the graph has data:
+
+```bash
+python exercises/02-modeling/seed.py
+```
+
+✅ You see:
+```
+Seeding companies...    ✓ 10 companies
+Seeding people...       ✓ 10 people
+Seeding products...     ✓ 25 products
+Seeding relationships...  ✓ done
+Graph is ready! Open http://localhost:7474
+```
+
+Now run the comparison:
 
 ```bash
 python demos/rag_vs_graph.py
 ```
 
 This asks the same three questions two ways — plain LLM vs GraphRAG.
-You will see the plain LLM answer from memory (possibly wrong, no source).
-You will see GraphRAG answer from structured data you control.
+Watch the plain LLM answer from memory (possibly wrong, no source).
+Then watch GraphRAG answer from structured data you control.
 
 That difference is what we spend today building.
 
@@ -432,34 +447,39 @@ The dataset we're using today is intentionally small — 10 companies, 10 people
 
 ---
 
-## 💻 Exercise 2 — Load the full dataset (1:45–2:00)
+## 💻 Exercise 2 — Explore the full dataset (1:45–2:00)
 
-First, clear what we created in Exercise 1.
-In the Neo4j browser run:
-```cypher
-MATCH (n) DETACH DELETE n
-```
+The graph is already loaded from the demo earlier.
+Let's explore it properly now that you understand the model.
 
-Now seed the full dataset:
-```bash
-python exercises/02-modeling/seed.py
-```
+Open http://localhost:7474 and run these one at a time:
 
-✅ You see:
-```
-Seeding companies...    ✓ 10 companies
-Seeding people...       ✓ 10 people
-Seeding products...     ✓ 25 products
-Seeding relationships...  ✓ done
-Graph is ready! Open http://localhost:7474
-```
-
-In the Neo4j browser run:
+**See everything:**
 ```cypher
 MATCH (n) RETURN n LIMIT 60
 ```
 
+**Just the companies and their products:**
+```cypher
+MATCH (c:Company)-[:MAKES]->(p:Product) RETURN c, p
+```
+
+**Just the people and who they founded:**
+```cypher
+MATCH (p:Person)-[:FOUNDED]->(c:Company) RETURN p, c
+```
+
+**Acquisitions:**
+```cypher
+MATCH (a:Company)-[:ACQUIRED]->(b) RETURN a, b
+```
+
 ✅ A rich connected graph fills the screen — the entire tech world in a graph.
+
+> **If your graph is empty** (you cleared it in Exercise 1):
+> ```bash
+> python exercises/02-modeling/seed.py
+> ```
 
 ---
 
