@@ -43,14 +43,14 @@ neo4j_driver = GraphDatabase.driver(
 # The point is to show that text fragments can't answer relationship questions.
 #
 DOCUMENTS = [
+    "Microsoft Azure is a leading cloud computing platform. "
+    "Microsoft also makes Copilot, an AI assistant powered by GPT-4.",
+
+    "Google offers Google Cloud for enterprise cloud computing. "
+    "Google also developed Gemini, its large language model and AI product.",
+
     "Amazon Web Services (AWS) is a cloud computing platform offered by Amazon. "
     "It provides services like EC2, S3, and Lambda. AWS is the market leader in cloud.",
-
-    "Microsoft Azure is a cloud computing service by Microsoft. "
-    "Azure competes with AWS and Google Cloud in the enterprise market.",
-
-    "Google Cloud Platform (GCP) offers cloud services including Compute Engine and BigQuery. "
-    "Google Cloud is used by many enterprises as an alternative to AWS.",
 
     "Microsoft offers many products including Windows, Azure, GitHub, VS Code, and Copilot. "
     "Copilot is an AI assistant integrated into Microsoft products.",
@@ -273,6 +273,10 @@ def main():
     QUESTIONS = [
         "Which companies make products that compete with AWS?",
         "What products did companies founded by Elon Musk make?",
+        # This is the killer question — RAG retrieves relevant chunks but
+        # cannot JOIN two separate facts (cloud product + AI product) for
+        # the same company. The graph does it in one query.
+        "Which companies make both a cloud product and an AI product?",
     ]
 
     for i, question in enumerate(QUESTIONS, 1):
