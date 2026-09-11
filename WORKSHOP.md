@@ -498,6 +498,26 @@ The hard work is the design work. And that's the valuable work — because anyon
 
 ---
 
+## 📖 The data model — what's in the graph
+
+Before we explore, open **[DATA_MODEL.md](DATA_MODEL.md)** — it has the full reference:
+- All node types and their properties
+- All relationship types with examples
+- Complete list of every company, person, and product loaded
+- Useful exploration queries
+
+**Quick summary:**
+```
+(Person)  -[:FOUNDED]->       (Company) ──[:MAKES]──> (Product)
+(Person)  -[:CEO_OF]->        (Company)
+(Company) -[:ACQUIRED]->      (Company)
+(Product) -[:COMPETES_WITH]-> (Product)
+```
+
+**12 people · 10 companies · 25 products · 5 relationship types**
+
+---
+
 ## 💻 Exercise 2 — Explore the full dataset (1:45–2:00)
 
 The graph is already loaded from the demo earlier.
