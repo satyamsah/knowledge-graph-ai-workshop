@@ -170,8 +170,8 @@ show(
 console.print(Rule("[bold]Your Turn — Try These in the Browser[/bold]"))
 console.print("""
 [bold]Challenge 1:[/bold] Companies with both a cloud AND an AI product
-  Hint: MATCH (c)-[:MAKES]->(cloud:Product {{category:"cloud"}})
-        MATCH (c)-[:MAKES]->(ai:Product   {{category:"AI"}})
+  Hint: MATCH (c)-[:MAKES]->(cloud:Product {category:"cloud"})
+        MATCH (c)-[:MAKES]->(ai:Product   {category:"AI"})
 
 [bold]Challenge 2:[/bold] CEO of a company founded by someone else
   Hint: MATCH (ceo:Person)-[:CEO_OF]->(c:Company)<-[:FOUNDED]-(founder:Person)

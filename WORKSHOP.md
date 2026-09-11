@@ -557,7 +557,6 @@ This runs 5 queries, each explained inline. Watch the output — especially Quer
 
 **Challenge 1:** Which companies have both a cloud product AND an AI product?
 ```cypher
--- Hint: use two MATCH patterns on the same company node
 MATCH (c:Company)-[:MAKES]->(cloud:Product {category:"cloud"})
 MATCH (c)-[:MAKES]->(ai:Product {category:"AI"})
 RETURN c.name, cloud.name AS cloud_product, ai.name AS ai_product
