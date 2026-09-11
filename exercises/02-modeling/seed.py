@@ -44,6 +44,8 @@ PEOPLE = [
     {"name": "Sam Altman"},
     {"name": "Jensen Huang"},
     {"name": "Dario Amodei"},
+    {"name": "Larry Page"},
+    {"name": "Sergey Brin"},
 ]
 
 PRODUCTS = [
@@ -85,6 +87,8 @@ FOUNDED = [
     ("Sam Altman",       "OpenAI"),
     ("Jensen Huang",     "Nvidia"),
     ("Dario Amodei",     "Anthropic"),
+    ("Larry Page",       "Google"),
+    ("Sergey Brin",      "Google"),
 ]
 
 CEO_OF = [

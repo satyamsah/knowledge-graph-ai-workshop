@@ -170,12 +170,16 @@ show(
 console.print(Rule("[bold]Your Turn — Try These in the Browser[/bold]"))
 console.print("""
 [bold]Challenge 1:[/bold] Companies with both a cloud AND an AI product
-  Hint: MATCH (c)-[:MAKES]->(cloud:Product {category:"cloud"})
-        MATCH (c)-[:MAKES]->(ai:Product   {category:"AI"})
 
-[bold]Challenge 2:[/bold] CEO of a company founded by someone else
-  Hint: MATCH (ceo:Person)-[:CEO_OF]->(c:Company)<-[:FOUNDED]-(founder:Person)
-        WHERE ceo <> founder
+  MATCH (c:Company)-[:MAKES]->(cloud:Product {category:"cloud"})
+  MATCH (c)-[:MAKES]->(ai:Product {category:"AI"})
+  RETURN c.name, cloud.name AS cloud_product, ai.name AS ai_product
+
+[bold]Challenge 2:[/bold] Who is CEO of a company they did NOT found?
+
+  MATCH (ceo:Person)-[:CEO_OF]->(c:Company)
+  WHERE NOT (ceo)-[:FOUNDED]->(c)
+  RETURN ceo.name AS ceo, c.name AS company
 """)
 
 driver.close()
