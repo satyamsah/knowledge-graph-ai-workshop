@@ -47,7 +47,14 @@ Relationship types (always use this exact direction):
   (Person)  -[:CEO_OF]->       (Company)
   (Company) -[:MAKES]->        (Product)
   (Company) -[:ACQUIRED]->     (Company or Product node)
-  (Product) -[:COMPETES_WITH]- (Product)   ← no arrow; competition is symmetric, always match undirected
+  (Product) -[:COMPETES_WITH]- (Product)
+
+IMPORTANT — COMPETES_WITH is stored one-way but is symmetric.
+Always match it WITHOUT a direction arrow: -[:COMPETES_WITH]-
+Example — competitors of AWS:
+  MATCH (aws:Product {name:'AWS'})-[:COMPETES_WITH]-(c:Product) RETURN c.name
+Example — companies making AWS competitors:
+  MATCH (aws:Product {name:'AWS'})-[:COMPETES_WITH]-(p:Product)<-[:MAKES]-(c:Company) RETURN DISTINCT c.name
 
 Sample values — Companies: Apple, Google, Microsoft, Amazon, Meta, OpenAI,
 Anthropic, Nvidia, Tesla, SpaceX

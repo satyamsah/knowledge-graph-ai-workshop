@@ -116,11 +116,20 @@ Graph schema:
          Person  {name}
 
   Relationships:
-    (Person)  -[:FOUNDED]->       (Company)
-    (Person)  -[:CEO_OF]->        (Company)
-    (Company) -[:MAKES]->         (Product)
-    (Company) -[:ACQUIRED]->      (Company)
-    (Product) -[:COMPETES_WITH]-> (Product)
+    (Person)  -[:FOUNDED]->      (Company)
+    (Person)  -[:CEO_OF]->       (Company)
+    (Company) -[:MAKES]->        (Product)
+    (Company) -[:ACQUIRED]->     (Company)
+    (Product) -[:COMPETES_WITH]- (Product)
+
+  IMPORTANT — COMPETES_WITH is stored one-way but is symmetric.
+  Always match it WITHOUT a direction arrow: -[:COMPETES_WITH]-
+  To find what competes with AWS:
+    MATCH (aws:Product {name:'AWS'})-[:COMPETES_WITH]-(competitor:Product)
+    RETURN competitor.name
+  To find companies that make competitors of AWS:
+    MATCH (aws:Product {name:'AWS'})-[:COMPETES_WITH]-(competitor:Product)<-[:MAKES]-(c:Company)
+    RETURN DISTINCT c.name
 
   Sample data:
     Companies : Apple, Google, Microsoft, Amazon, Meta, OpenAI, Anthropic, Nvidia, Tesla, SpaceX

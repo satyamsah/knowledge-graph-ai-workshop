@@ -322,7 +322,10 @@ WHERE f.name = 'Elon Musk'
 (Elon Musk)-[:FOUNDED]->(Company)-[:MAKES]->(Product)
 ```
 
-The more hops, the bigger the gap. Graphs are built for this.
+Each arrow you follow is called a **hop**. One hop = one relationship crossed.
+SQL needs one JOIN per hop — two hops means two JOINs, four hops means four JOINs, and the query becomes a mess.
+In a graph you just keep following arrows — the pattern stays simple no matter how many hops you need.
+The deeper the question, the bigger the advantage of a graph.
 
 ---
 
