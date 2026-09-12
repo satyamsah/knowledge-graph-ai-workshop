@@ -260,103 +260,6 @@ Then watch GraphRAG return an exact structured answer.
 
 That difference is what we spend today building.
 
----
-
-### ⚠️ Live shortcoming — relationship direction matters
-
-> **Presenter note:** This is an intentional live failure. Do not fix it in advance. Let it fail in front of the audience, then walk through the diagnosis and fix step by step. This is more memorable than a demo that always works.
-
----
-
-**Step 1 — trigger the failure**
-
-Run the assistant:
-```bash
-python project/src/assistant.py
-```
-
-At the prompt, type:
-```
-Which products compete with AWS?
-```
-
-The assistant returns something like:
-> *"I cannot answer this question because there is no data available in the knowledge graph about companies that compete with AWS."*
-
-Say to the audience: *"Interesting — we know AWS, Azure and Google Cloud are competitors. Why did the graph return nothing?"*
-
----
-
-**Step 2 — show the graph in the browser**
-
-Open http://localhost:7474 and run:
-```cypher
-MATCH (a)-[:COMPETES_WITH]->(b) RETURN a.name, b.name
-```
-
-Point out: every arrow points **away from** AWS. The graph stores:
-```
-AWS ──[:COMPETES_WITH]──> Azure
-AWS ──[:COMPETES_WITH]──> Google Cloud
-```
-
-Say: *"The data is there. So why did the query fail?"*
-
----
-
-**Step 3 — show the bad Cypher the LLM generated**
-
-Look at the terminal output — the assistant printed the generated Cypher. It looks like:
-```cypher
-MATCH (p:Product)-[:COMPETES_WITH]->(aws:Product {name:"AWS"})
-RETURN p.name
-```
-
-Paste this into the Neo4j browser. Run it. Show 0 results.
-
-Now explain: *"That arrow is pointing AT AWS. But in our graph, all the arrows point AWAY from AWS. The LLM made a reasonable assumption — it just got the direction wrong."*
-
----
-
-**Step 4 — fix it live in the browser**
-
-Remove the `>` to make the match undirected:
-```cypher
-MATCH (p:Product)-[:COMPETES_WITH]-(aws:Product {name:"AWS"})
-RETURN p.name
-```
-
-Run it. Azure and Google Cloud appear.
-
-Say: *"One character. That's the difference between an answer and silence."*
-
----
-
-**Step 5 — fix it in the code**
-
-Open `project/src/assistant.py`. Find the `GRAPH_SCHEMA` block. Change:
-```
-(Product) -[:COMPETES_WITH]-> (Product)
-```
-to:
-```
-(Product) -[:COMPETES_WITH]- (Product)   ← no arrow; competition is symmetric, always match undirected
-```
-
-Save the file. Re-run the assistant and ask the same question. It now returns correct results.
-
----
-
-**Step 6 — land the lesson**
-
-> *"What just happened? The graph had the right data. The LLM is capable. But the schema hint we gave the LLM said the relationship has a direction — so it generated a directional query. Garbage in, garbage out.*
->
-> *This is why graph data modeling is a real skill. The direction of a relationship, whether it is symmetric, whether you store it once or twice — these decisions directly affect what questions your system can answer.*
->
-> *A well-modeled small graph beats a poorly-modeled large one every time."*
-
-> **The lesson:** Graph data modeling decisions (direction, symmetry, cardinality) directly affect what queries are possible. This is why the data model matters as much as the data itself.
-
 ✅ You understand why we need a Knowledge Graph. Move to Part 2.
 
 ---
@@ -847,6 +750,88 @@ Which cloud platforms exist and who runs them?
 ```
 
 ✅ You just built a GraphRAG system — end to end.
+
+---
+
+## ⚠️ Live shortcoming — relationship direction matters
+
+> **Presenter note:** This is an intentional live failure. Do not fix the code in advance — let it fail in front of the audience, diagnose it together, then fix it live. The assistant is already running so there is no setup needed.
+
+The assistant is running. At the prompt, type:
+```
+Which products compete with AWS?
+```
+
+You will get:
+> *"I cannot answer this question because there is no data available in the knowledge graph about companies that compete with AWS."*
+
+Say: *"We know Azure and Google Cloud compete with AWS. The data is in the graph. Why did the assistant return nothing?"*
+
+---
+
+**Step 1 — look at the Cypher the LLM generated**
+
+The terminal already printed it. It looks like:
+```cypher
+MATCH (p:Product)-[:COMPETES_WITH]->(aws:Product {name:"AWS"})
+RETURN p.name
+```
+
+Open http://localhost:7474, paste this query, run it. 0 results.
+
+---
+
+**Step 2 — show what is actually stored**
+
+In the browser, run:
+```cypher
+MATCH (a)-[:COMPETES_WITH]->(b) RETURN a.name, b.name
+```
+
+Point out: every arrow points **away from** AWS:
+```
+AWS ──[:COMPETES_WITH]──> Azure
+AWS ──[:COMPETES_WITH]──> Google Cloud
+```
+
+Say: *"The LLM query asked for arrows pointing AT AWS. The graph only has arrows pointing AWAY. One character difference — zero results."*
+
+---
+
+**Step 3 — fix it live in the browser**
+
+Remove the `>` to match in either direction:
+```cypher
+MATCH (p:Product)-[:COMPETES_WITH]-(aws:Product {name:"AWS"})
+RETURN p.name
+```
+
+Run it. Azure and Google Cloud appear.
+
+Say: *"That's it. One character — the `>`. The difference between an answer and silence."*
+
+---
+
+**Step 4 — fix the schema hint in the code**
+
+Open `project/src/assistant.py`. In the `GRAPH_SCHEMA` block, change:
+```
+(Product) -[:COMPETES_WITH]-> (Product)   ← intentionally directional; fixed live during demo
+```
+to:
+```
+(Product) -[:COMPETES_WITH]- (Product)   ← no arrow; competition is symmetric, always match undirected
+```
+
+Save. Ask the same question again. It now returns the correct answer.
+
+---
+
+**The lesson:**
+
+> *"The graph had the right data. The LLM is capable. But the schema hint told the LLM the relationship has a direction — so it generated a directional query and got nothing.*
+>
+> *This is why data modeling matters. The direction of a relationship, whether it is symmetric — these decisions directly affect what questions your system can answer. A well-modeled small graph beats a poorly-modeled large one every time."*
 
 ---
 
