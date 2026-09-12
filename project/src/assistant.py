@@ -43,11 +43,11 @@ Node labels and key properties:
   Person   { name }
 
 Relationship types (always use this exact direction):
-  (Person)  -[:FOUNDED]->       (Company)
-  (Person)  -[:CEO_OF]->        (Company)
-  (Company) -[:MAKES]->         (Product)
-  (Company) -[:ACQUIRED]->      (Company or Product node)
-  (Product) -[:COMPETES_WITH]-> (Product)   ← intentionally directional; fixed live during demo
+  (Person)  -[:FOUNDED]->      (Company)
+  (Person)  -[:CEO_OF]->       (Company)
+  (Company) -[:MAKES]->        (Product)
+  (Company) -[:ACQUIRED]->     (Company or Product node)
+  (Product) -[:COMPETES_WITH]- (Product)   ← no arrow; competition is symmetric, always match undirected
 
 Sample values — Companies: Apple, Google, Microsoft, Amazon, Meta, OpenAI,
 Anthropic, Nvidia, Tesla, SpaceX

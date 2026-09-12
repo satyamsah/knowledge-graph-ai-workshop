@@ -60,7 +60,7 @@ Relationship types — direction matters, always use exactly as shown:
   (Person)  -[:CEO_OF]->        (Company)
   (Company) -[:MAKES]->         (Product)
   (Company) -[:ACQUIRED]->      (Company)
-  (Product) -[:COMPETES_WITH]-> (Product)
+  (Product) -[:COMPETES_WITH]- (Product)   ← no arrow; competition is symmetric, always match undirected
 
 Sample node values:
   Companies : Apple, Google, Microsoft, Amazon, Meta, OpenAI, Anthropic, Nvidia, Tesla, SpaceX
