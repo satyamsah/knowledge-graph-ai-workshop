@@ -748,6 +748,52 @@ That judgment only comes from doing the work. You did it today.
 
 ---
 
+## 📖 Real-world use case — SAP Environment Intelligence Agent
+
+Everything you built today is directly applicable in a real enterprise context.
+
+Here is one example: **SAP consultants spend the first days of every engagement just figuring out what environment they're working in** — which products are installed, which versions, which services are running, what depends on what. This is currently done manually by reading documentation, running CLI commands, and asking around.
+
+**What a Knowledge Graph changes:**
+
+Instead of manual discovery, an agent runs at the start of the engagement:
+
+```
+consultant runs: python inspect_env.py --target dev-subaccount
+
+Agent automatically:
+  → connects to BTP APIs and CF environment
+  → discovers installed services, versions, dependencies
+  → builds a Knowledge Graph on the fly:
+      (S/4HANA 2023)-[:REQUIRES]->(HANA Cloud)
+      (HANA Cloud)-[:VERSION]->(2.0 SP07)
+      (BTP Subaccount)-[:CONTAINS]->(AI Core)
+      (AI Core)-[:DEPENDS_ON]->(Object Store)
+  → consultant asks in plain English:
+      "Is anything approaching end of maintenance?"
+      "What services does AI Core depend on?"
+      "Which products are not yet configured?"
+  → GraphRAG answers from the graph — not from memory
+```
+
+**Why this matters:**
+- Discovery that takes 2 days takes 2 minutes
+- The graph persists — the next consultant inherits the knowledge
+- Questions that require connecting multiple facts (versions + dependencies + status) are answered instantly
+- Works across AWS, Azure, and SAP BTP environments
+
+**The pattern is identical to what you built today:**
+- Data model → nodes for Product, Version, Service, Dependency, Environment
+- Seed script → replaced by an agent that calls BTP/CF APIs
+- GraphRAG pipeline → same two-LLM-call pattern
+- Natural language Q&A → same `exercise.py` pattern
+
+The only difference is the domain. The architecture is what you built.
+
+> This is why understanding the fundamentals matters — the same pattern applies everywhere.
+
+---
+
 ## What's next
 
 | Resource | What's in it |
