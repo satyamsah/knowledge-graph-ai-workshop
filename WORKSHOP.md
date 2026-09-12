@@ -89,7 +89,7 @@ python check_setup.py
 
 ## 📖 The problem with plain LLMs
 
-Ask ChatGPT: *"What is the latest iPhone model?"*
+Ask ChatGPT: *"What is the last Spider-Man movie?"*
 
 It answers confidently — but its knowledge has a **cutoff date**.
 It might be wrong. It can't tell you when it's wrong.
@@ -192,6 +192,46 @@ GraphRAG   →  grounded in structured facts + relationships  ← we build this
 ---
 
 ## 👀 DEMO — see all three live
+
+### What is a graph database?
+
+A **graph database** stores data as **nodes** (things) and **relationships** (connections between things) — not tables and rows.
+
+| Relational DB | Graph DB |
+|---|---|
+| Tables, rows, columns | Nodes, relationships, properties |
+| Foreign keys to connect data | Direct pointers — no JOINs needed |
+| Good for flat records | Good for connected data |
+
+The key insight: **relationships are first-class citizens**. You don't have to compute them — they are stored directly in the graph.
+
+---
+
+### Why do we use a graph database here?
+
+Questions like *"What did Elon Musk's companies build?"* or *"Which companies make both a cloud AND an AI product?"* require following connections across multiple entities.
+
+- In SQL: you need multiple JOINs across tables
+- In a graph: you just **follow the arrows**
+
+Graph databases are purpose-built for traversal — finding paths and patterns through connected data. That makes them a natural fit for Knowledge Graphs.
+
+---
+
+### Why is seed.py important?
+
+`seed.py` is what **puts the knowledge into the Knowledge Graph**. Without it, the graph is empty — and an empty graph gives you nothing.
+
+Think of it as the "import" step:
+- It defines the facts (Apple makes iPhone, Elon Musk founded Tesla)
+- It creates the nodes and relationships in Neo4j
+- It is idempotent — you can run it multiple times safely (MERGE, not CREATE)
+
+In a real production system, seed.py is replaced by a pipeline that pulls data from APIs, databases, or documents. But the pattern is the same: **structured facts go in, graph comes out**.
+
+> Run seed.py once before every demo or exercise — it is the foundation everything else builds on.
+
+---
 
 First load the dataset so the graph has data:
 
