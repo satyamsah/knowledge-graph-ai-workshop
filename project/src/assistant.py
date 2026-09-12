@@ -47,7 +47,7 @@ Relationship types (always use this exact direction):
   (Person)  -[:CEO_OF]->        (Company)
   (Company) -[:MAKES]->         (Product)
   (Company) -[:ACQUIRED]->      (Company or Product node)
-  (Product) -[:COMPETES_WITH]-> (Product)
+  (Product) -[:COMPETES_WITH]-> (Product)   ← intentionally directional; fixed live during demo
 
 Sample values — Companies: Apple, Google, Microsoft, Amazon, Meta, OpenAI,
 Anthropic, Nvidia, Tesla, SpaceX
