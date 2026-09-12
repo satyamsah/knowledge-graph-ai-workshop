@@ -749,20 +749,18 @@ What did Elon Musk's companies build?
 Which cloud platforms exist and who runs them?
 ```
 
-✅ You just built a GraphRAG system — end to end.
-
----
-
-## ⚠️ Live shortcoming — relationship direction matters
-
-> **Presenter note:** This is an intentional live failure. Do not fix the code in advance — let it fail in front of the audience, diagnose it together, then fix it live. The assistant is already running so there is no setup needed.
-
-The assistant is running. At the prompt, type:
+Now try this one:
 ```
 Which products compete with AWS?
 ```
 
-You will get:
+---
+
+## ⚠️ When it fails — relationship direction matters
+
+> **Presenter note:** The question above will return an empty answer. This is intentional — do not fix the code in advance. Let it fail, diagnose it together, fix it live.
+
+The assistant returns:
 > *"I cannot answer this question because there is no data available in the knowledge graph about companies that compete with AWS."*
 
 Say: *"We know Azure and Google Cloud compete with AWS. The data is in the graph. Why did the assistant return nothing?"*
@@ -832,6 +830,8 @@ Save. Ask the same question again. It now returns the correct answer.
 > *"The graph had the right data. The LLM is capable. But the schema hint told the LLM the relationship has a direction — so it generated a directional query and got nothing.*
 >
 > *This is why data modeling matters. The direction of a relationship, whether it is symmetric — these decisions directly affect what questions your system can answer. A well-modeled small graph beats a poorly-modeled large one every time."*
+
+✅ You just built a GraphRAG system — end to end. And you fixed a real bug in it.
 
 ---
 
