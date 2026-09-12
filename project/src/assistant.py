@@ -56,6 +56,12 @@ Example — competitors of AWS:
 Example — companies making AWS competitors:
   MATCH (aws:Product {name:'AWS'})-[:COMPETES_WITH]-(p:Product)<-[:MAKES]-(c:Company) RETURN DISTINCT c.name
 
+Example patterns — always follow arrows in the correct direction:
+  Who founded a company:        MATCH (p:Person)-[:FOUNDED]->(c:Company) RETURN p.name, c.name
+  CEO of AI companies:          MATCH (p:Person)-[:CEO_OF]->(c:Company)-[:MAKES]->(prod:Product {category:"AI"}) RETURN DISTINCT p.name, c.name
+  Products a company makes:     MATCH (c:Company {name:'Apple'})-[:MAKES]->(p:Product) RETURN p.name
+  Multi-hop (founder → product): MATCH (p:Person)-[:FOUNDED]->(c:Company)-[:MAKES]->(prod:Product) RETURN p.name, prod.name
+
 Sample values — Companies: Apple, Google, Microsoft, Amazon, Meta, OpenAI,
 Anthropic, Nvidia, Tesla, SpaceX
 Sample values — People: Steve Jobs, Steve Wozniak, Bill Gates, Jeff Bezos,
