@@ -10,6 +10,39 @@ This demo shows the SAME question answered three ways:
 Run:  python demos/rag_vs_graph.py
 
 Watch how the quality improves at each step — and WHY.
+
+── What each section of this file does ──────────────────────────────────────
+
+  DOCUMENTS (line ~47)
+    Hardcoded text chunks that simulate a RAG document store.
+    ★ Notice: cloud facts and AI facts for the same company are in SEPARATE chunks.
+      That is intentional — it is what makes RAG fail on relationship questions.
+      RAG retrieves the top-k most similar chunks. It cannot JOIN two chunks
+      about the same company together. Graphs can.
+
+  simulate_rag_retrieval() (line ~88)
+    Fake retrieval — picks chunks that mention keywords from the question.
+    In a real RAG system this would be a vector similarity search.
+    ★ Watch the "Retrieved chunks" panel — those are the raw text fragments
+      the LLM gets. Can it answer a relationship question from those?
+
+  CYPHER_SYSTEM (line ~109)
+    The schema hint passed to the LLM for GraphRAG query generation.
+    ★ Compare this to the DOCUMENTS above. One is structured, one is prose.
+      The structured schema is why GraphRAG can answer relationship questions.
+
+  plain_llm_answer()     — LLM answers from training memory only. No data.
+  rag_answer()           — LLM answers from retrieved text chunks.
+  to_cypher()            — LLM Call 1: question → Cypher query.
+  run_cypher()           — Executes Cypher against Neo4j, returns structured data.
+  graph_answer()         — LLM Call 2: question + graph results → plain English.
+
+── This file is a teaching tool, NOT production code ────────────────────────
+
+  In production you would NOT have three competing approaches in one file.
+  You would pick GraphRAG, wrap it in an API, and add logging + auth.
+  The GraphRAG pattern here (to_cypher → run_cypher → graph_answer) is
+  exactly what you keep. The rest is scaffolding for the demo.
 """
 
 import os

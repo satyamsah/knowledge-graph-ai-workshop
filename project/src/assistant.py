@@ -1,11 +1,61 @@
 """
 GraphRAG assistant — complete end-to-end project.
+==================================================
+The full pipeline in one file — question in, plain English answer out.
+No debug panels. No teaching scaffolding. This is the production-ready pattern.
 
-The full pipeline in one file:
-  seed data → ask questions → get answers from the graph via LLM
+  Your question
+      → LLM Call 1 (to_cypher):    question + schema → Cypher query
+      → Neo4j      (run_query):     Cypher → structured results
+      → LLM Call 2 (synthesise):   question + results → plain English answer
+
+── What each section of this file does ──────────────────────────────────────
+
+  GRAPH_SCHEMA (line ~36)
+    The graph's structure in plain text — passed to the LLM as context.
+    Includes node types, relationship types, and concrete examples.
+    ★ In production this would be auto-generated from the live Neo4j schema
+      using: CALL db.schema.visualization()
+
+  CYPHER_SYSTEM (line ~69)
+    System prompt for LLM Call 1. Constrains the LLM to return ONLY valid Cypher.
+    Contains the schema, rules, and example patterns.
+    ★ This is your most important tuning lever. Better prompt = better Cypher.
+
+  ANSWER_SYSTEM (line ~82)
+    System prompt for LLM Call 2. Constrains the LLM to answer ONLY from graph data.
+    ★ The "never make up facts" rule is what makes GraphRAG trustworthy.
+
+  to_cypher() (line ~90)
+    LLM Call 1. Pure function: question string → Cypher string.
+
+  run_query() (line ~97)
+    Executes Cypher against Neo4j. Returns (results, error).
+    ★ Returns an error tuple instead of raising — so a bad LLM query doesn't crash.
+
+  synthesise() (line ~105)
+    LLM Call 2. Pure function: (question, results) → answer string.
+
+  ask() (line ~119)
+    The full pipeline: question → Cypher → results → answer.
+    ★ This is the single function you would wrap in a POST /ask endpoint.
+
+── How this maps to production ──────────────────────────────────────────────
+
+  Today (terminal)            →  Production
+  ───────────────────────────────────────────────────────────────
+  GRAPH_SCHEMA (hardcoded)    →  Auto-generated from live graph schema
+  to_cypher()                 →  Query service + Cypher validation layer
+  run_query()                 →  Neo4j read replica with connection pooling
+  synthesise()                →  Answer service with response caching
+  ask()                       →  POST /ask endpoint (FastAPI / Flask)
+  interactive_mode() loop     →  Web UI / Slack bot / CLI tool
+  No auth                     →  OAuth / API keys / RBAC
+  No logging                  →  Every query + Cypher + answer logged for audit
 
 Usage:
-  python project/src/assistant.py
+  python project/src/assistant.py        ← interactive mode
+  python project/src/assistant.py demo   ← run 8 pre-written questions
 """
 
 import os

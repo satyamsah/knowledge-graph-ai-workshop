@@ -11,6 +11,50 @@ In this exercise you will see the full GraphRAG pipeline in action:
 You don't write Cypher — the LLM writes it for you.
 But you can see exactly what Cypher it generated in the output.
 
+── What each section of this file does ──────────────────────────────────────
+
+  GRAPH_SCHEMA (line ~47)
+    A plain text description of your graph — nodes, properties, relationships.
+    This is what you pass to the LLM so it knows how to write valid Cypher.
+    ★ The quality of this schema directly determines answer quality.
+      If the LLM generates wrong Cypher, fix the schema hint first.
+
+  CYPHER_SYSTEM (line ~93)
+    The system prompt for LLM Call 1.
+    It tells the LLM: "You are a Cypher expert. Return ONLY Cypher. No explanation."
+    ★ Watch the Generated Cypher panel — that is this prompt's output.
+
+  question_to_cypher() (line ~107)
+    LLM Call 1. Sends question + schema → gets back raw Cypher text.
+    Strips markdown fences in case the model wraps the query anyway.
+
+  run_cypher() (line ~123)
+    Executes the Cypher against Neo4j. Returns a list of dicts.
+    ★ If the answer is wrong, print the results here first — is the data correct?
+
+  ANSWER_SYSTEM (line ~134)
+    The system prompt for LLM Call 2.
+    It tells the LLM: "Answer using ONLY the data provided. No guessing."
+    ★ This is what prevents hallucination. The LLM cannot add facts not in results.
+
+  results_to_answer() (line ~140)
+    LLM Call 2. Sends question + raw graph results → gets back plain English.
+
+  ask() (line ~153)
+    The full pipeline in one function: question → Cypher → results → answer.
+    ★ This is the function you would expose as an API endpoint in production.
+
+── How this maps to production ──────────────────────────────────────────────
+
+  Today (terminal)          →  Production
+  ─────────────────────────────────────────────────────
+  GRAPH_SCHEMA (hardcoded)  →  Generated from live graph schema via CALL db.schema
+  question_to_cypher()      →  Query microservice with retry logic + Cypher validation
+  run_cypher()              →  Read replica Neo4j with connection pooling
+  results_to_answer()       →  Answer service with response caching
+  ask()                     →  POST /ask endpoint (FastAPI / Flask)
+  Terminal input loop       →  Web UI / Slack bot / API client
+
 Run:  python exercises/04-llm-integration/exercise.py
 """
 
