@@ -92,6 +92,7 @@ Rules:
 - Use MATCH, OPTIONAL MATCH, WHERE, RETURN, ORDER BY, LIMIT only.
 - Never use CREATE, MERGE, DELETE, or SET.
 - Limit results to 20 rows unless the question asks for all.
+- If the input is not a question about the graph, return exactly: MATCH (n) RETURN n.name LIMIT 1
 
 Graph schema:
 {GRAPH_SCHEMA}"""
