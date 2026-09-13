@@ -700,10 +700,9 @@ RETURN c.name, cloud.name AS cloud_product, ai.name AS ai_product
 
 **Challenge 2:** Who is CEO of a company that was founded by someone else?
 ```cypher
--- Hint: match both relationships on the same company, check they're different people
-MATCH (ceo:Person)-[:CEO_OF]->(c:Company)<-[:FOUNDED]-(founder:Person)
-WHERE ceo <> founder
-RETURN ceo.name AS ceo, c.name AS company, founder.name AS founder
+MATCH (ceo:Person)-[:CEO_OF]->(c:Company)
+WHERE NOT (ceo)-[:FOUNDED]->(c)
+RETURN ceo.name AS ceo, c.name AS company
 ```
 
 ✅ Both challenges return results.
