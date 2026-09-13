@@ -419,6 +419,59 @@ Click on a node to see its properties.
 
 ---
 
+## 📖 Cypher syntax you need for the exercise
+
+Before you write anything, here are the five building blocks you will use:
+
+**`MERGE` — create if it doesn't exist, find it if it does**
+```cypher
+MERGE (c:Company {name: "Apple"})
+```
+Safe to run multiple times. If Apple already exists, nothing changes. If it doesn't, it gets created.
+This is different from `CREATE` which always makes a new node — even duplicates.
+
+**`MATCH` — find something that already exists**
+```cypher
+MATCH (c:Company {name: "Apple"})
+```
+Finds the Apple node. If it doesn't exist, the query returns nothing and stops.
+
+**`ON CREATE SET` — set properties only when first created**
+```cypher
+MERGE (c:Company {name: "Apple"})
+ON CREATE SET c.founded = 1976, c.hq = "Cupertino"
+```
+The `founded` and `hq` properties are only written if Apple was just created. If it already existed, they are left alone.
+
+**`(n:Label {prop: $value})` — node pattern**
+```cypher
+(:Person {name: $name})
+```
+`:Person` is the label (the type). `{name: $name}` is a property filter or setter. `$name` is a parameter — the actual value comes from Python.
+
+**`(a)-[:TYPE]->(b)` — relationship pattern**
+```cypher
+MERGE (p)-[:FOUNDED]->(c)
+```
+Creates a `FOUNDED` relationship from `p` to `c`. The arrow direction matters — always left to right here.
+
+**Putting it together — what you will write:**
+```python
+def create_person(tx, name):
+    tx.run("MERGE (:Person {name: $name})", name=name)
+    #       ↑ Cypher string              ↑ Python value passed as parameter
+
+def link_founder(tx, person, company):
+    tx.run("""
+        MATCH (p:Person  {name: $person})
+        MATCH (c:Company {name: $company})
+        MERGE (p)-[:FOUNDED]->(c)
+    """, person=person, company=company)
+    # MATCH finds existing nodes, MERGE creates the relationship between them
+```
+
+---
+
 ## 💻 Your turn — add a real founder
 
 We'll add **Linus Torvalds** — the creator of Linux.

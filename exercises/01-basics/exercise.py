@@ -84,25 +84,20 @@ print('  MATCH (c:Company)-[:MAKES]->(p:Product) RETURN c, p')
 #   MATCH (p:Person {name: $person}), (c:Company {name: $company})
 #   MERGE (p)-[:FOUNDED]->(c)
 #
-# Step a — fill in this function:
+# Step a — fill in this function (replace pass with a tx.run() call):
 def create_person(tx, name):
-    tx.run("MERGE (:Person {name: $name})", name=name)
+    pass  # TODO: MERGE a Person node with the given name
 
+# Step b — fill in this function (replace pass with a tx.run() call):
 def link_founder(tx, person, company):
-    tx.run(
-        """
-        MATCH (p:Person  {name: $person})
-        MATCH (c:Company {name: $company})
-        MERGE (p)-[:FOUNDED]->(c)
-        """,
-        person=person, company=company,
-    )
+    pass  # TODO: MATCH the Person and Company, then MERGE (p)-[:FOUNDED]->(c)
+
 # Step c — uncomment these lines once your functions above are ready:
-with driver.session() as session:
-    session.execute_write(create_person,  "Linus Torvalds")
-    session.execute_write(create_company, "Linux Foundation", 1991, "San Francisco")
-    session.execute_write(link_founder,   "Linus Torvalds", "Linux Foundation")
-    print("✓ Linus Torvalds linked to Linux Foundation")
+# with driver.session() as session:
+#     session.execute_write(create_person,  "Linus Torvalds")
+#     session.execute_write(create_company, "Linux Foundation", 1991, "San Francisco")
+#     session.execute_write(link_founder,   "Linus Torvalds", "Linux Foundation")
+#     print("✓ Linus Torvalds linked to Linux Foundation")
 
 # Step d — verify in the Neo4j browser:
 #   MATCH (p:Person)-[:FOUNDED]->(c:Company) RETURN p, c
