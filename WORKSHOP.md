@@ -922,7 +922,7 @@ That judgment only comes from doing the work. You did it today.
 
 Everything you built today is directly applicable in a real enterprise context.
 
-Here is one example: **SAP consultants spend the first days of every engagement just figuring out what environment they're working in** — which products are installed, which versions, which services are running, what depends on what. This is currently done manually by reading documentation, running CLI commands, and asking around.
+Here is one example: **consultants spend the first days of every engagement just figuring out what environment they're working in** — which products are installed, which versions, which services are running, what depends on what. This is currently done manually by reading documentation, running CLI commands, and asking around.
 
 **What a Knowledge Graph changes:**
 
@@ -932,29 +932,72 @@ Instead of manual discovery, an agent runs at the start of the engagement:
 consultant runs: python inspect_env.py --target dev-subaccount
 
 Agent automatically:
-  → connects to BTP APIs and CF environment
+  → connects to cloud APIs and the target environment
   → discovers installed services, versions, dependencies
   → builds a Knowledge Graph on the fly:
-      (S/4HANA 2023)-[:REQUIRES]->(HANA Cloud)
-      (HANA Cloud)-[:VERSION]->(2.0 SP07)
-      (BTP Subaccount)-[:CONTAINS]->(AI Core)
-      (AI Core)-[:DEPENDS_ON]->(Object Store)
+      (ERP 2023)-[:REQUIRES]->(Database Cloud)
+      (Database Cloud)-[:VERSION]->(2.0 SP07)
+      (Cloud Subaccount)-[:CONTAINS]->(AI Service)
+      (AI Service)-[:DEPENDS_ON]->(Object Store)
   → consultant asks in plain English:
       "Is anything approaching end of maintenance?"
-      "What services does AI Core depend on?"
+      "What services does the AI Service depend on?"
       "Which products are not yet configured?"
   → GraphRAG answers from the graph — not from memory
 ```
 
+---
+
+### How the graph gets built — API response → graph mapping
+
+This is where the real engineering work lives. **Someone has to define the mapping once.** It does not happen automatically or magically.
+
+A developer looks at what the API returns and decides how it becomes graph data:
+
+```
+API response (JSON)                    Graph mapping (written by developer once)
+──────────────────────────────────────────────────────────────────────────────
+{                                      session.run("""
+  "service": "AI Service",               MERGE (s:Service {name: $name})
+  "depends_on": ["Object Store"],        MERGE (d:Service {name: $dep})
+  "version": "2.1"                       ON CREATE SET s.version = $version
+}                                        MERGE (s)-[:DEPENDS_ON]->(d)
+                                       """,
+                                         name="AI Service",
+                                         dep="Object Store",
+                                         version="2.1")
+```
+
+The developer is answering: *"What questions do I want to ask later?"*
+That answer shapes how the graph is modeled — which fields become nodes, which become properties, which become relationships.
+
+**Who does what:**
+
+| Step | Who | How often |
+|---|---|---|
+| Define the graph model | Developer (human) | Once, upfront |
+| Write the API → MERGE mapping | Developer (human) | Once per data source |
+| Call the API and run the MERGEs | Agent / script | Automatically, on demand |
+| Q&A on the graph | LLM | Every question |
+
+**The analogy to today:**
+- `seed.py` = you wrote the mapping by hand (Apple → iPhone, Elon Musk → Tesla)
+- In production = a script calls the API and does the same MERGE statements automatically
+- The mapping logic was still written by a human developer first
+
+> **The graph does not design itself.** Human judgment defines the model. Automation fills it with data. LLM queries it.
+
+---
+
 **Why this matters:**
 - Discovery that takes 2 days takes 2 minutes
-- The graph persists — the next consultant inherits the knowledge
+- The graph persists — the next person inherits the knowledge
 - Questions that require connecting multiple facts (versions + dependencies + status) are answered instantly
-- Works across AWS, Azure, and SAP BTP environments
+- Works across any cloud environment or API
 
 **The pattern is identical to what you built today:**
-- Data model → nodes for Product, Version, Service, Dependency, Environment
-- Seed script → replaced by an agent that calls BTP/CF APIs
+- Data model → nodes for Service, Version, Dependency, Environment
+- Seed script → replaced by an agent that calls cloud APIs
 - GraphRAG pipeline → same two-LLM-call pattern
 - Natural language Q&A → same `exercise.py` pattern
 
