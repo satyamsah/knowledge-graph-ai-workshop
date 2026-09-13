@@ -85,6 +85,9 @@ python check_setup.py
 
 # PART 1 — Why We Need This (0:15–0:45)
 
+> **New to RAG?** Read every section below — it builds the context you need before the demo.
+> **Already know RAG?** Skim the concept pages and jump straight to the demo. You'll see exactly where graphs fill the gap RAG can't.
+
 ---
 
 ## 📖 The problem with plain LLMs
@@ -384,11 +387,15 @@ RETURN jobs, apple
 
 The graph grows by connection — Apple already existed, we just linked Steve Jobs to it.
 
+> **Try it yourself** — type these two queries in the Neo4j browser right now. Don't copy-paste — type them. The muscle memory of writing `(node)-[:RELATIONSHIP]->(node)` is what makes the next exercise click.
+
 ✅ You understand nodes, relationships, and properties. Move to Exercise 1.
 
 ---
 
 # PART 3 — Exercise 1: Your First Graph (1:00–1:15)
+
+You just typed Cypher in the browser. Now you'll do the same thing from Python — connecting to Neo4j, creating nodes, and linking them with relationships. Same concepts, different interface.
 
 ---
 
