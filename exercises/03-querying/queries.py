@@ -164,8 +164,8 @@ show(
 #
 # Challenge 2:
 #   Who is the CEO of a company that was founded by someone else?
-#   Hint: match both [:CEO_OF] and [:FOUNDED] on the same company,
-#         then check the two people are different (ceo <> founder)
+#   Hint: find all CEO_OF relationships, then use WHERE NOT to exclude
+#         cases where the CEO also has a FOUNDED relationship to the same company
 #
 console.print(Rule("[bold]Your Turn — Try These in the Browser[/bold]"))
 console.print("""
@@ -175,11 +175,18 @@ console.print("""
   MATCH (c)-[:MAKES]->(ai:Product {category:"AI"})
   RETURN c.name, cloud.name AS cloud_product, ai.name AS ai_product
 
+  Why two MATCH lines? Each MATCH adds a condition on the same (c) node.
+  Both must be true — the company must make a cloud product AND an AI product.
+
 [bold]Challenge 2:[/bold] Who is CEO of a company they did NOT found?
 
   MATCH (ceo:Person)-[:CEO_OF]->(c:Company)
   WHERE NOT (ceo)-[:FOUNDED]->(c)
   RETURN ceo.name AS ceo, c.name AS company
+
+  WHERE NOT (...) checks that a pattern does NOT exist in the graph.
+  Here: find all CEOs, then exclude anyone who also has a FOUNDED
+  relationship to the same company. What's left are CEOs who didn't found it.
 """)
 
 driver.close()
