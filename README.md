@@ -43,11 +43,34 @@ to control.
 | Requirement | Notes |
 |-------------|-------|
 | Python 3.10+ | `python3 --version` to check (Mac/Linux use `python3`) |
-| Docker Desktop | [docker.com/get-started](https://www.docker.com/get-started) |
+| Docker Desktop | See install steps below — must be running before the session |
 | Anthropic API key | [console.anthropic.com](https://console.anthropic.com) — free tier works |
-| A terminal | Any OS |
+| A terminal | Terminal on Mac, PowerShell or Command Prompt on Windows |
 
 No prior database or graph experience needed.
+
+---
+
+## Install Docker Desktop (do this first)
+
+Docker runs the Neo4j graph database locally. You need it before anything else.
+
+**Mac:**
+1. Go to [docker.com/products/docker-desktop](https://www.docker.com/products/docker-desktop/)
+2. Click **Download for Mac** — choose Apple Silicon if you have an M1/M2/M3 chip, Intel if older
+3. Open the downloaded `.dmg` file and drag Docker to Applications
+4. Open Docker from Applications — wait for the whale icon to appear in your menu bar
+5. Verify: open Terminal and run `docker --version` — you should see a version number
+
+**Windows:**
+1. Go to [docker.com/products/docker-desktop](https://www.docker.com/products/docker-desktop/)
+2. Click **Download for Windows**
+3. Run the installer — leave all defaults, it will ask to enable WSL 2 (say yes)
+4. Restart your computer when prompted
+5. Open Docker Desktop from the Start menu — wait for it to say "Docker Desktop is running"
+6. Verify: open PowerShell and run `docker --version` — you should see a version number
+
+> **Important:** Docker Desktop must be open and running before you run `docker compose up -d`. If Docker is not running, the command will fail.
 
 ---
 
@@ -56,7 +79,7 @@ No prior database or graph experience needed.
 ### 1. Get the code
 
 ```bash
-git clone https://github.com/your-org/knowledge-graph-ai-workshop
+git clone https://github.com/satyamsah/knowledge-graph-ai-workshop
 cd knowledge-graph-ai-workshop
 ```
 
@@ -118,31 +141,24 @@ You should see:
 
 ```
 knowledge-graph-ai-workshop/
-├── README.md
+├── WORKSHOP.md               ← follow this during the session
+├── DATA_MODEL.md             ← full graph schema reference
+├── README.md                 ← you are here
 ├── docker-compose.yml
 ├── requirements.txt
 ├── check_setup.py
 ├── .env.example
 │
-├── slides/                   presentation notes for each module
-│   ├── 00-welcome.md
-│   ├── 01-rag.md
-│   ├── 02-knowledge-graphs.md
-│   ├── 03-modeling.md
-│   ├── 04-querying.md
-│   └── 05-llm-integration.md
-│
 ├── exercises/                hands-on coding exercises
-│   ├── 01-basics/
-│   ├── 02-modeling/
-│   ├── 03-querying/
-│   └── 04-llm-integration/
+│   ├── 01-basics/            Exercise 1 — your first graph
+│   ├── 02-modeling/          Exercise 2 — seed the full dataset
+│   ├── 03-querying/          Exercise 3 — Cypher queries
+│   └── 04-llm-integration/   Exercise 4 — LLM Q&A pipeline
 │
-├── project/                  complete end-to-end demo
-│   ├── data/
-│   └── src/
+├── demos/
+│   └── rag_vs_graph.py       Plain LLM vs RAG vs GraphRAG comparison
 │
-└── references/               cheat sheets
-    ├── cypher-cheatsheet.md
-    └── further-reading.md
+└── project/
+    └── src/
+        └── assistant.py      Complete end-to-end GraphRAG assistant
 ```
