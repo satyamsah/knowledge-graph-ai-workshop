@@ -317,31 +317,17 @@ Now run the comparison:
 python demos/rag_vs_graph.py
 ```
 
-### 📂 What is this file and what does it do?
+### 📂 What is this file?
 
-`demos/rag_vs_graph.py` is a **purpose-built comparison script**. It is not something you would ship in production — it exists purely to show three approaches side by side so you can feel the difference.
+`demos/rag_vs_graph.py` — a comparison script, not production code. Three answer functions, three questions, side by side.
 
-Inside the file there are three things:
-1. **A hardcoded list of text documents** (`DOCUMENTS`) — these simulate what a RAG system would have indexed. They are intentionally written so that cloud facts and AI facts for the same company are in *separate chunks*. That is what makes RAG fail on relationship questions.
-2. **Three answer functions** — `plain_llm_answer()`, `rag_answer()`, `graph_answer()` — each uses a different strategy.
-3. **Three questions** — each one is designed to expose a weakness in the simpler approaches and a strength in GraphRAG.
+**Watch for:**
+- 👀 **Plain LLM** — confident but no source
+- 👀 **RAG chunks** — raw text fragments, cloud and AI facts for the same company are in separate chunks — RAG can't connect them
+- 👀 **Generated Cypher** — LLM writing a query in real time from your question
+- 👀 **GraphRAG answer** — precise, sourced from the graph
 
-**What to eyeball when it runs:**
-
-- 👀 **Plain LLM panel** — the answer sounds confident. Watch for hallucinations or outdated facts. There is no source you can check.
-- 👀 **RAG — Retrieved chunks panel** — read the chunks carefully. Notice they are raw text fragments. The chunk about AWS being a cloud service is separate from the chunk about Amazon making AI products. RAG cannot connect them.
-- 👀 **Generated Cypher panel** — this is the LLM writing a database query in real time. It has never seen this question before. Watch how it translates plain English into structured Cypher.
-- 👀 **GraphRAG Answer panel** — precise, short, sourced directly from the graph. No guessing.
-
-**What to say to the audience:**
-
-> *"This file is just for today. In production, nobody ships a comparison script. But the GraphRAG pattern inside it — question → Cypher → graph results → answer — that is exactly what you would put behind an API in a real system."*
-
-Watch the same question answered three ways.
-Pay attention to the RAG chunks — notice they are text fragments that don't give you structured company → product relationships.
-Then watch GraphRAG return an exact structured answer.
-
-That difference is what we spend today building.
+Watch the same question answered three ways. That difference is what we spend today building.
 
 ✅ You understand why we need a Knowledge Graph. Move to Part 2.
 
