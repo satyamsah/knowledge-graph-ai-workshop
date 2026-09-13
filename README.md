@@ -33,8 +33,9 @@ to control.
 | 1:15–1:30 | ☕ Break | — |
 | 1:30–2:00 | Modeling & loading data | Slides + exercise 2 |
 | 2:00–2:30 | Querying the graph | Slides + exercise 3 |
-| 2:30–3:00 | Connecting the LLM | Slides + exercise 4 |
-| 3:00–3:30 | End-to-end project + Q&A | Live coding |
+| 2:30–2:40 | ☕ Short break | — |
+| 2:40–3:10 | Connecting the LLM | Slides + exercise 4 |
+| 3:10–3:30 | End-to-end project + Q&A | Live coding |
 
 ---
 

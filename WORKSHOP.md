@@ -762,7 +762,13 @@ RETURN ceo.name AS ceo, c.name AS company
 
 ---
 
-# PART 6 — Connecting the LLM (2:30–3:00)
+# ☕ Short Break (2:30–2:40)
+
+Take 10 minutes. The next section connects everything — LLM + graph + natural language. It is the most rewarding part of the day.
+
+---
+
+# PART 6 — Connecting the LLM (2:40–3:10)
 
 ---
 
@@ -829,7 +835,7 @@ Better schema prompt = better Cypher = better answers.
 
 ---
 
-## 💻 Exercise 4 — Run the Q&A assistant (2:40–3:00)
+## 💻 Exercise 4 — Run the Q&A assistant (2:50–3:10)
 
 ### 📂 What is this file and what does it do?
 
@@ -876,7 +882,7 @@ What cloud products exist and who makes them?
 
 ---
 
-# PART 7 — End-to-End Project (3:00–3:30)
+# PART 7 — End-to-End Project (3:10–3:30)
 
 ---
 
