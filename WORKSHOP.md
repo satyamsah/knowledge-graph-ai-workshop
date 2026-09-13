@@ -254,6 +254,26 @@ Now run the comparison:
 python demos/rag_vs_graph.py
 ```
 
+### 📂 What is this file and what does it do?
+
+`demos/rag_vs_graph.py` is a **purpose-built comparison script**. It is not something you would ship in production — it exists purely to show three approaches side by side so you can feel the difference.
+
+Inside the file there are three things:
+1. **A hardcoded list of text documents** (`DOCUMENTS`) — these simulate what a RAG system would have indexed. They are intentionally written so that cloud facts and AI facts for the same company are in *separate chunks*. That is what makes RAG fail on relationship questions.
+2. **Three answer functions** — `plain_llm_answer()`, `rag_answer()`, `graph_answer()` — each uses a different strategy.
+3. **Three questions** — each one is designed to expose a weakness in the simpler approaches and a strength in GraphRAG.
+
+**What to eyeball when it runs:**
+
+- 👀 **Plain LLM panel** — the answer sounds confident. Watch for hallucinations or outdated facts. There is no source you can check.
+- 👀 **RAG — Retrieved chunks panel** — read the chunks carefully. Notice they are raw text fragments. The chunk about AWS being a cloud service is separate from the chunk about Amazon making AI products. RAG cannot connect them.
+- 👀 **Generated Cypher panel** — this is the LLM writing a database query in real time. It has never seen this question before. Watch how it translates plain English into structured Cypher.
+- 👀 **GraphRAG Answer panel** — precise, short, sourced directly from the graph. No guessing.
+
+**What to say to the audience:**
+
+> *"This file is just for today. In production, nobody ships a comparison script. But the GraphRAG pattern inside it — question → Cypher → graph results → answer — that is exactly what you would put behind an API in a real system."*
+
 Watch the same question answered three ways.
 Pay attention to the RAG chunks — notice they are text fragments that don't give you structured company → product relationships.
 Then watch GraphRAG return an exact structured answer.
@@ -706,6 +726,31 @@ Better schema prompt = better Cypher = better answers.
 
 ## 💻 Exercise 4 — Run the Q&A assistant (2:40–3:00)
 
+### 📂 What is this file and what does it do?
+
+`exercises/04-llm-integration/exercise.py` is the **learning version of GraphRAG**. Everything is deliberately exposed so you can see inside the pipeline. This is not a black box — it is a teaching tool.
+
+Inside the file there are four things:
+1. **`GRAPH_SCHEMA`** — a plain text description of your graph that gets passed to the LLM. This is what tells the LLM what nodes, relationships, and properties exist. Without this, the LLM would have to guess.
+2. **`question_to_cypher()`** — LLM Call 1. Takes your question, sends it to Claude with the schema, returns raw Cypher.
+3. **`run_cypher()`** — executes the Cypher against Neo4j and returns structured results.
+4. **`results_to_answer()`** — LLM Call 2. Takes the question + graph results, returns a plain English answer.
+
+**What to eyeball when it runs:**
+
+- 👀 **Generated Cypher (LLM Call 1) panel** — this is the most important thing to watch. Read every query. Ask yourself: does it match the question? Is the direction of the arrows correct? Does it use MATCH or WHERE correctly? The LLM is writing this from scratch based only on the schema hint you gave it.
+- 👀 **The results table** — raw data straight from Neo4j. Before the answer appears, look at this. Is the data correct? If the answer is wrong, the problem is almost always here — either bad Cypher or missing data.
+- 👀 **Answer (LLM Call 2) panel** — the LLM is only allowed to use the data in the results. It cannot add facts from its training. If it says "I don't have that information" — the graph result was empty, not the LLM failing.
+
+**What to say to the audience:**
+
+> *"In production, you would hide the Cypher panel — users don't need to see it. But as a developer, this is exactly what you would monitor. If something goes wrong, the Cypher panel tells you whether the problem is in the LLM prompt, the graph schema, or the data. That's your debugging window."*
+
+**The key difference from production:**
+- No API layer — you are calling it directly from the terminal
+- No auth, no logging, no error recovery
+- The schema hint is hardcoded — in production it would be generated dynamically from the live graph schema
+
 ```bash
 python exercises/04-llm-integration/exercise.py
 ```
@@ -873,7 +918,7 @@ That judgment only comes from doing the work. You did it today.
 
 ---
 
-## 📖 Real-world use case — SAP Environment Intelligence Agent
+## 📖 Real-world use case
 
 Everything you built today is directly applicable in a real enterprise context.
 
