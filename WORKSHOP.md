@@ -109,13 +109,42 @@ It doesn't *look things up* — it *remembers* (imperfectly).
 The fix: before the LLM answers, *fetch relevant context* and include it in the prompt.
 
 ```
-Your question
-     ↓
-[Retrieval step] — find relevant documents / chunks
-     ↓
-Augmented prompt = question + retrieved context
-     ↓
-LLM generates answer grounded in that context
+┌─────────────────────────────────────────────────────────────┐
+│                        RAG Pipeline                         │
+└─────────────────────────────────────────────────────────────┘
+
+  User question: "Which companies make cloud products?"
+        │
+        ▼
+  ┌─────────────────┐
+  │  Embed question │  — turn question into a vector
+  └────────┬────────┘
+           │
+           ▼
+  ┌─────────────────────────────────────────┐
+  │           Vector Search                 │
+  │  Doc 1: "AWS is Amazon's cloud..."  0.91│  ← top match
+  │  Doc 2: "Azure is Microsoft's..."   0.88│  ← top match
+  │  Doc 3: "Apple makes iPhones..."    0.12│  ← ignored
+  └────────┬────────────────────────────────┘
+           │  top-k chunks retrieved
+           ▼
+  ┌─────────────────────────────────────────┐
+  │  Augmented Prompt                       │
+  │  "Answer using these passages:          │
+  │   Passage 1: AWS is Amazon's cloud...   │
+  │   Passage 2: Azure is Microsoft's...    │
+  │   Question: Which companies make        │
+  │   cloud products?"                      │
+  └────────┬────────────────────────────────┘
+           │
+           ▼
+  ┌─────────────────┐
+  │       LLM       │  — generates answer from passages
+  └────────┬────────┘
+           │
+           ▼
+  "Amazon and Microsoft make cloud products."
 ```
 
 **How retrieval works:**
@@ -156,18 +185,49 @@ Vector search can't do this reliably. The answer isn't in a paragraph — it's i
 Instead of retrieving text chunks, retrieve **graph facts**:
 
 ```
-Your question
-     ↓
-LLM translates question → structured graph query
-     ↓
-Graph database returns exact facts + relationships
-     ↓
-LLM turns results into a plain English answer
+┌─────────────────────────────────────────────────────────────┐
+│                     GraphRAG Pipeline                       │
+└─────────────────────────────────────────────────────────────┘
+
+  User question: "Which companies make cloud products?"
+        │
+        ▼
+  ┌─────────────────────────────────────────┐
+  │  LLM Call 1 — Text → Cypher            │
+  │                                         │
+  │  "Translate this question into Cypher   │
+  │   using the graph schema below..."      │
+  └────────┬────────────────────────────────┘
+           │  generates:
+           │  MATCH (c:Company)-[:MAKES]->(p:Product)
+           │  WHERE p.category = "cloud"
+           │  RETURN c.name, p.name
+           ▼
+  ┌─────────────────────────────────────────┐
+  │  Neo4j — Graph Query                    │
+  │                                         │
+  │  (Amazon) ──[:MAKES]──> (AWS)           │
+  │  (Microsoft) ──[:MAKES]──> (Azure)      │
+  │  (Google) ──[:MAKES]──> (Google Cloud)  │
+  └────────┬────────────────────────────────┘
+           │  exact structured results:
+           │  [Amazon→AWS, Microsoft→Azure,
+           │   Google→Google Cloud]
+           ▼
+  ┌─────────────────────────────────────────┐
+  │  LLM Call 2 — Results → Plain English   │
+  │                                         │
+  │  "Answer using ONLY this graph data:    │
+  │   [Amazon→AWS, Microsoft→Azure...]"     │
+  └────────┬────────────────────────────────┘
+           │
+           ▼
+  "Amazon (AWS), Microsoft (Azure), and Google
+   (Google Cloud) all make cloud products."
 ```
 
 This is **GraphRAG** — and it's what we build today.
 
-The journey:
 ```
 Plain LLM  →  fast but makes things up
     ↓
